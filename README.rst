@@ -16,7 +16,7 @@ The aim of exercise three is:
 
 Most of the exercise concerns control of the ball and beam process.
 
-.. image:: img/bom.gif
+.. image:: http://www.control.lth.se/previouscourse/FRTN01/Exercise3_12/bom.gif
 
 Instead of using the real process you will use a virtual, simulated ball
 and beam process. A Swing-based GUI to the controllers is available. A
@@ -139,7 +139,7 @@ through which the amplitude and period (in seconds) can be changed.
 The class ``Beam`` is a simulated "virtual" ball and beam process
 without any ball. It shows a plotter and an animation of the process.
 
-.. image:: img/virtual.png
+.. image:: http://www.control.lth.se/previouscourse/FRTN01/Exercise3_12/virtual.png
    :scale: 80 %
 
 4. Compile and run the system, The files that you need are Beam.java
@@ -183,7 +183,7 @@ of the ball.  However, we also have access to the angle of the beam. In
 a cascade controller the intermediate process output is used to close an
 inner control loop, according to the Figure below:
 
-.. image:: img/block.png
+.. image:: http://www.control.lth.se/previouscourse/FRTN01/Exercise3_12/block.png
 
 The output from the outer controller now becomes the reference for the inner controller. The advantages of a cascaded controller are that:
 

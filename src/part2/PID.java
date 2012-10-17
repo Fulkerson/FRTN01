@@ -1,7 +1,5 @@
 package part2;
 
-import part1.PIGUI;
-
 // PID class to be written by you
 public class PID {
 
@@ -72,7 +70,6 @@ public class PID {
 	  p = (PIDParameters) newParameters.clone();
 	  ad = p.Td / (p.Td + p.N*p.H);
 	  bd = p.K*ad*p.N;
-
   }
 
 }

@@ -10,17 +10,16 @@ public class BeamAndBallRegul extends Thread {
 	private ReferenceGenerator referenceGenerator;
 	private PID pidControl;
 	private PI piControl;
-	
+
 	private AnalogSource beamAngle;
 	private AnalogSource ballPos;
 	private AnalogSink beamOut;
 	private AnalogSink analogRef;
-	
+
 	// Input x to the B&B process is |x| < 10 Volt
 	private double uMin = -10.0;
 	private double uMax = 10.0;
-	
-	
+
 	// Constructor
 	public BeamAndBallRegul(ReferenceGenerator ref, BeamAndBall beam, int pri) {
 		referenceGenerator = ref;
@@ -32,10 +31,12 @@ public class BeamAndBallRegul extends Thread {
 		analogRef = beam.getSink(1);
 		setPriority(pri);
 	}
-	
+
 	/**
 	 * Bound signal.
-	 * @param u signal to be bounded.
+	 * 
+	 * @param u
+	 *            signal to be bounded.
 	 * @return bounded signal.
 	 */
 	private double boundSignal(double u) {
@@ -50,21 +51,27 @@ public class BeamAndBallRegul extends Thread {
 
 	public void run() {
 		long t = System.currentTimeMillis();
-		
+
 		while (true) {
 			// do stuff
 			double yBeam = beamAngle.get();
-			double refBeam = referenceGenerator.getRef();
-			
-			synchronized(piControl) {
-				double u = boundSignal(piControl.calculateOutput(yBeam,
-						refBeam));
-				beamOut.set(u);
-				piControl.updateState(u);
+			double yBall = ballPos.get();
+			double refBall = referenceGenerator.getRef();
+
+			synchronized (pidControl) {
+				double uBall = pidControl.calculateOutput(yBall, refBall);
+				synchronized (piControl) {
+					double uBeam = piControl.calculateOutput(yBeam, uBall);
+
+					beamOut.set(uBeam);
+
+					pidControl.updateState(uBeam);
+				}
+				piControl.updateState(uBall);
 			}
-			analogRef.set(refBeam);
-			
-			t = t + piControl.getHMillis();
+			analogRef.set(refBall);
+
+			t = t + pidControl.getHMillis();
 			long sleepFor = t - System.currentTimeMillis();
 			if (sleepFor > 0) {
 				try {
@@ -75,6 +82,6 @@ public class BeamAndBallRegul extends Thread {
 				}
 			}
 		}
-		
+
 	}
 }

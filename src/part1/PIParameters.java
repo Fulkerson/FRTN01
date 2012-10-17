@@ -1,11 +1,11 @@
 package part1;
 public class PIParameters implements Cloneable {
-	double K;
-	double Ti;
-	double Tr;
-	double Beta;
-	double H;
-	boolean integratorOn;
+	public double K;
+	public double Ti;
+	public double Tr;
+	public double Beta;
+	public double H;
+	public boolean integratorOn;
 	
 	public Object clone() {
 		try {

@@ -1,13 +1,13 @@
 package part2;
 public class PIDParameters implements Cloneable {
-    double K;
-    double Ti;
-    double Tr;
-    double Td;
-    double N;
-    double Beta;
-    double H;
-    boolean integratorOn;
+    public double K;
+    public double Ti;
+    public double Tr;
+    public double Td;
+    public double N;
+    public double Beta;
+    public double H;
+    public boolean integratorOn;
 
     public Object clone() {
 		try {

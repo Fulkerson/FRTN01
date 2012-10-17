@@ -2,6 +2,7 @@ package part1;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+
 import se.lth.control.*;
 
 public class PIGUI {

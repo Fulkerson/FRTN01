@@ -40,6 +40,13 @@
     <!-- Repack and include protobuf -->
 	<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
     </jar>
+    <jar destfile="jar/Lab.jar" basedir="bin">
+      <manifest>
+        <attribute name="Main-Class" value="lab.Main"/>
+      </manifest>
+    <!-- Repack and include protobuf -->
+	<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
+    </jar>
   </target>
 
   <target name="runBeam" depends="jar">
@@ -49,5 +56,10 @@
   <target name="runBallAndBeam" depends="jar">
     <java jar="jar/BallAndBeam.jar" fork="true"/>
   </target>
+
+  <target name="runLab" depends="jar">
+    <java jar="jar/Lab.jar" fork="true"/>
+  </target>
+
 </project>
 

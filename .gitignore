@@ -1,13 +1,27 @@
-*.class
-*.log
+*.pydevproject
+.project
+.metadata
+jar/
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
 
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
+# External tool builders
+.externalToolBuilders/
 
-# Scala-IDE specific
-.scala_dependencies
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath

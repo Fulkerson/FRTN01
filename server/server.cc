@@ -8,11 +8,26 @@
 
 using boost::asio::ip::tcp;
 
+Connection::Connection(tcp::socket* socket) : 
+    socket(socket) {}
 
 void
-hello()
+Connection::run()
 {
-    std::cout << "Hello from thread " << std::endl;
+    try {
+        std::string message("Hello World!\n");
+        boost::system::error_code ignored_error;
+        boost::asio::write(*socket, boost::asio::buffer(message),
+                           ignored_error);
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+    delete this;
+}
+
+Connection::~Connection() 
+{
+    delete socket;
 }
 
 
@@ -23,16 +38,17 @@ main()
         boost::asio::io_service io_service;
         tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 54000));
 
+        Connection* conn;
+
         while(true) {
-            tcp::socket socket(io_service);
-            acceptor.accept(socket);
+            tcp::socket* socket = new tcp::socket(io_service);
+            acceptor.accept(*socket);
 
-            std::string message("Hello World!");
+            conn = new Connection(socket);
+            std::thread t(&Connection::run, conn);
+            t.detach();
 
-            boost::system::error_code ignored_error;
-            boost::asio::write(socket, boost::asio::buffer(message),
-                               ignored_error);
-        }
+       }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

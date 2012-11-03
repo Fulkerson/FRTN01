@@ -10,11 +10,13 @@ all: server
 server: server.o batchtank.pb.o
 	$(CXX) $(CXXFLAGS) server.o batchtank.pb.o -o server
 
-server.o: server.cc
+server.o: server.cc batchtank.pb.h
 	$(CXX) -c $(CXXFLAGS) server.cc -o server.o
 
 batchtank.pb.o: batchtank.pb.cc
 	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o
+
+batchtank.pb.h: batchtank.pb.cc
 
 batchtank.pb.cc: $(PROTO_DIR)/batchtank.proto
 	protoc -I=$(PROTO_DIR) $(PROTO_DIR)/batchtank.proto --cpp_out=.

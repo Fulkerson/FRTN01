@@ -1,0 +1,26 @@
+package batchtank;
+
+option optimize_for = LITE_RUNTIME;
+
+enum SensorType {
+    HEATERSENSOR = 0;
+    COOLERSENSOR = 1;
+    INLETSENSOR = 2;
+    OUTLETSENSOR = 3;
+}
+
+enum OutputType {
+    HEATER = 0;
+    COOLER = 1;
+    INLETPUMP = 2;
+    OUTLETPUMP = 3;
+}
+
+message BaseMessage {
+    repeated Sample sample = 1;
+}
+
+message Sample {
+    required double value = 1;
+    required SensorType type = 2;
+}

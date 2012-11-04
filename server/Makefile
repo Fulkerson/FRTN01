@@ -3,16 +3,17 @@ CXXFLAGS  = -std=c++11 -pipe -O0 -g -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
-LDLIBS = -lprotobuf-lite -lboost_system -lpthread
+LDLIBS = -lprotobuf-lite -lboost_system -lboost_thread-mt
 PROTO_DIR = ../proto
 
-all: server
+all: batchtank_server
 
-server: server.o batchtank.pb.o
-	$(CXX) $(CXXFLAGS) server.o batchtank.pb.o $(LDLIBS) -o server
+batchtank_server: batchtank_server.o batchtank.pb.o
+	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o $(LDLIBS) \
+		-o batchtank_server
 
-server.o: server.cc batchtank.pb.h
-	$(CXX) -c $(CXXFLAGS) server.cc -o server.o
+batchtank_server.o: batchtank_server.cc batchtank.pb.h
+	$(CXX) -c $(CXXFLAGS) batchtank_server.cc -o batchtank_server.o
 
 batchtank.pb.o: batchtank.pb.cc
 	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o
@@ -23,7 +24,7 @@ batchtank.pb.cc: $(PROTO_DIR)/batchtank.proto
 	protoc -I=$(PROTO_DIR) $(PROTO_DIR)/batchtank.proto --cpp_out=.
 
 clean:
-	rm -rf server *.o
+	rm -rf batchtank_server *.o
 
-protoclean:
+protoclean: clean
 	rm -rf batchtank.pb.h batchtank.pb.cc

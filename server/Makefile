@@ -1,4 +1,3 @@
-CXX       = g++
 CXXFLAGS  = -std=c++11 -pipe -O0 -g -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 # Uncomment below line for raspbian. Hard float is faster.

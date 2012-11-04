@@ -5,7 +5,8 @@
           Jonathan Kämpe,
           Mikael Sahlström,
           Mikael Nilsson
-:Date: Wed Oct 31 15:31:34 CET 2012
+:Date: Sun Nov  4 11:33:23 CET 2012
+:Version: 2
 
 
 Program structure
@@ -17,8 +18,9 @@ The program will consist of the following modules:
 * Plotting client
 * Disturbance client (optional)
 
-.. image:: ritning.png 
-   :scale: 30 %
+.. image:: system_sketch.png
+  :align:  center
+  :scale:  40 %
 
 Server
 ~~~~~~

@@ -7,6 +7,8 @@ the course FRTN01_
 
 .. _FRTN01: http://www.control.lth.se/course/FRTN01/
 
+----
+
 The system is composed of the following parts:
 
 batchtank_server

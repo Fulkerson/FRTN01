@@ -9,8 +9,8 @@ using boost::asio::ip::tcp;
 using namespace batchtank;
 
 
-ConnectionThread::ConnectionThread(std::shared_ptr<tcp::socket> socket) :
-    m_Socket(socket) {}
+ConnectionThread::ConnectionThread(std::shared_ptr<tcp::iostream> stream) :
+    m_Stream(stream) {}
 
    
 void
@@ -26,12 +26,11 @@ ConnectionThread::run()
 {
     try {
         boost::posix_time::seconds periodTime(3);
-        std::string message("Hello World!\n");
         boost::system::error_code ignored_error;
 
         while(true) {
-            boost::asio::write(*m_Socket, boost::asio::buffer(message),
-                               ignored_error);
+            std::cout << "hello world!" << std::endl;
+            *m_Stream << "hello world!" << std::endl;
             boost::this_thread::sleep(periodTime);
         }
     } catch (std::exception& e) {
@@ -46,15 +45,16 @@ main()
 {
     try {
         boost::asio::io_service io_service;
-        tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 54000));
+        tcp::endpoint endpoint(tcp::v4(), 54000);
+        tcp::acceptor acceptor(io_service, endpoint);
 
         while(true) {
-            std::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));
-            acceptor.accept(*socket);
+            std::shared_ptr<tcp::iostream> stream(new tcp::iostream());
+            acceptor.accept(*(stream->rdbuf()));
 
-            (new ConnectionThread(socket))->start();
+            (new ConnectionThread(stream))->start();
 
-       }
+        }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

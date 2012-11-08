@@ -22,7 +22,6 @@ double PID::next(double y){
 	if (u < umin)
 		u = umin;
 	eo = e;
-	std::cout << u;
 	return u;
 }
 

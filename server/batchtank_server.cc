@@ -124,9 +124,10 @@ ConnectionThread::run()
         periodic.start();
 
         messages::BaseMessage msg;
-        MessageParser condition(msg, ibuf);
+        MessageParser<messages::BaseMessage> condition(msg, ibuf);
 
         while (true) {
+            /* Parse delimited protobuf message */
             int nbr_read = boost::asio::read(*m_Socket, ibuf, condition);
             std::cout << "Number of bytes read: " << nbr_read << std::endl;
             std::cout << "DEBUG: " << msg.DebugString() << std::endl;

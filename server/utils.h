@@ -5,9 +5,10 @@
 
 using namespace google::protobuf::io;
 
+template <class Message>
 class MessageParser {
     public:
-        MessageParser(batchtank_messages::BaseMessage& msg,
+        MessageParser(Message& msg,
                 boost::asio::streambuf& buf);
         bool operator()(const boost::system::error_code& error,
                 std::size_t bytes_transferred);
@@ -15,11 +16,12 @@ class MessageParser {
         bool size_parsed;
         std::size_t nbr_read;
         uint32_t msg_size;
-        batchtank_messages::BaseMessage& msg;
+        Message& msg;
         boost::asio::streambuf& buf;
 };
 
-MessageParser::MessageParser(batchtank_messages::BaseMessage& msg,
+template <class Message>
+MessageParser<Message>::MessageParser(Message& msg,
         boost::asio::streambuf& buf) : 
     size_parsed(false),
     nbr_read(0),
@@ -28,8 +30,8 @@ MessageParser::MessageParser(batchtank_messages::BaseMessage& msg,
     buf(buf) {}
 
 
-bool
-MessageParser::operator()(const boost::system::error_code& error,
+template <class Message>
+bool MessageParser<Message>::operator()(const boost::system::error_code& error,
         std::size_t bytes_transferred)
 {
     /* TODO: Parse error condition. */

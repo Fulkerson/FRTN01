@@ -1,8 +1,8 @@
-CXXFLAGS  = -std=c++11 -pipe -O0 -g -Wall -W -pedantic-errors
+CXXFLAGS += -std=c++11 -pipe -O0 -g -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
-LDLIBS = -lprotobuf-lite -lboost_system -lboost_thread-mt
+LDLIBS = -lprotobuf -lboost_system -lboost_thread-mt -lrt
 PROTO_DIR = ../proto
 
 all: batchtank_server

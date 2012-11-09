@@ -1,7 +1,5 @@
 package batchtank_messages;
 
-option optimize_for = LITE_RUNTIME;
-
 enum SensorType {
     HEATERSENSOR = 0;
     COOLERSENSOR = 1;
@@ -26,7 +24,8 @@ message BaseMessage {
 // Used for registering for a period time etc. 
 message Register {
     repeated SensorType type = 1;
-    optional double periodTime = 2;
+    // period in millis.
+    optional uint64 periodTime = 2;
 }
 
 message ControlSignal {

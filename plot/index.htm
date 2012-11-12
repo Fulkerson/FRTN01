@@ -22,6 +22,7 @@
 			updateData();
 
 			function updateData() {
+				// URL to data source:
 				var turl = 'data.php';
 				for (var i = 0; i < data.length; i += 1) {
 					if (i == 0) {
@@ -41,6 +42,8 @@
 								var i;
 								for (i = 0; i < data.length; i += 1) {
 									if (data[i]['label'] == key) {
+										// Start to remove old points if amount of
+										// point is more then this (per curve).
 										if (data[i]['data'].length > 20) {
 											data[i]['data'].shift();
 										}
@@ -50,6 +53,7 @@
 								}
 
 								if (i == data.length) {
+									// New curve. Add to plot.
 									data.push({label: key, data: [new_data[key]]});
 								}
 							}

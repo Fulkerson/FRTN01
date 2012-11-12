@@ -1,4 +1,17 @@
 <?php
+/*
+	Awnser with data on json format {"ref":[12,37],"out":[5,12],"in":[2,52],...}.
+	The point given after curve name will be added to that curve (eg. [12,37] will be
+	added to the curve ref in the plot).
+
+	New curves can be added or skipped as pleased.
+
+	The JS will (except when it has no data) send the curve name and a value as an get
+	argument. The value will be the last plotted x value on that curve.
+	Eg. data.php?ref=12&out=5&in=2
+*/
+
+
 	header('Cache-Control: no-cache, must-revalidate');
 	header('Content-type: application/json;charset=utf-8');
 

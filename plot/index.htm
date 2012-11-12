@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>plot</title>
+		<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+		<script language="javascript" type="text/javascript" src="jquery.js"></script>
+		<script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
+	</head>
+	<body>
+		<div id="placeholder" style="width:500px;height:400px;margin-left:auto;margin-right:auto;"></div>
+	<script type="text/javascript">
+		$(function() {
+			var x = [];
+			var data = [[],[]];
+			var options = {
+				lines: {show: true}
+			};
+			var placeholder = $("#placeholder");
+			$.plot(placeholder, data, options);
+			worker();
+
+			function worker() {
+				var turl = 'data.php';
+				for (var i = 0; i < x.length; i += 1) {
+					if (i == 0) {
+						turl += '?';
+					} else {
+						turl += '&';
+					}
+					turl += x[i][0] + '=' + x[i][1];
+				}
+				$.ajax({
+					url: turl;
+					success: function(new_data) {
+						x[0] = new_data[0][0];
+						x[1] = new_data[1][0];
+						if (data[0].length > 20) {
+							data[0].shift();
+							data[1].shift();
+						}
+						data[0].push(new_data[0]);
+						data[1].push(new_data[1]);
+						$.plot(placeholder, data, options);
+					},
+					complete: function() {
+						setTimeout(worker, 1000);
+					}
+				});
+			}
+		});
+
+	</script>
+	</body>
+</html>

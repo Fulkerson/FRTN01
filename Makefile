@@ -25,6 +25,6 @@ clean:
 	for DIR in $(SUB_DIRS); do \
 		cd $(PWD)/$$DIR && make clean && make uninstall; \
 	done
-	rmdir $(LIB_PATH)
-	rmdir $(BIN_PATH)
-	rmdir $(INCLUDE_PATH)
+	rmdir $(LIB_PATH) || return 0
+	rmdir $(BIN_PATH) || return 0 
+	rmdir $(INCLUDE_PATH) || return 0

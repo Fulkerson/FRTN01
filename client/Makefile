@@ -10,8 +10,8 @@ LDFLAGS= -L$(LIB_PATH) -lcontrol
 BIN_NAME= client
 OBJS= client.o
 
-all: $(OBJS) main.o
-	$(CC) -o $(BIN_NAME) $+
+all: $(OBJS) connection.o main.o 
+	$(CC) $(LDFLAGS) -o $(BIN_NAME) $+
 
 install: all
 	cp $(BIN_NAME) $(BIN_PATH)
@@ -19,10 +19,10 @@ install: all
 uninstall:
 	rm $(BIN_PATH)/$(BIN_NAME)
 
-test: all test.o 
-	$(CC) -o test $(OBJS) test.o 
-	./test
-	rm test
+test: $(OBJS) connection_dummy.o main.o 
+	$(CC) -o test $+ $(LDFLAGS)
+	./test url123url 1234
+#	rm test
 
 clean:
 	rm *.o $(BIN_NAME)

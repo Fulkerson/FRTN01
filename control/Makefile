@@ -8,20 +8,20 @@ HEAD= pid.h
 all: $(OBJS)
 	ar rcs lib$(LIB_NAME).a $+
 
-install: all
+install:
 	cp lib$(LIB_NAME).a $(LIB_PATH)
 	mkdir -p $(INCLUDE_PATH)/$(LIB_NAME)
 	cp $(HEAD) $(INCLUDE_PATH)/$(LIB_NAME)
 
 uninstall:
-	rm $(LIB_PATH)/lib$(LIB_NAME).a
-	rm -r $(INCLUDE_PATH)/$(LIB_NAME)
+	rm -f $(LIB_PATH)/lib$(LIB_NAME).a
+	rm -rf $(INCLUDE_PATH)/$(LIB_NAME)
 
 test: all test.o 
 	$(CC) -o test test.o -L. -l$(LIB_NAME)
 	./test
-	rm test
+	rm -f test
 
 clean:
-	rm *.o *.a
+	rm -f *.o *.a
 

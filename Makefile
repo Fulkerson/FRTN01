@@ -1,5 +1,8 @@
 
 
+
+# Internal install directories
+# These will be removed on clean
 LIB_PATH=$(PWD)/lib
 BIN_PATH=$(PWD)/bin
 INCLUDE_PATH=$(PWD)/include
@@ -22,3 +25,6 @@ clean:
 	for DIR in $(SUB_DIRS); do \
 		cd $(PWD)/$$DIR && make clean && make uninstall; \
 	done
+	rmdir $(LIB_PATH)
+	rmdir $(BIN_PATH)
+	rmdir $(INCLUDE_PATH)

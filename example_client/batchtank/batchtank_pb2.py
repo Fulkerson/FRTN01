@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='batchtank.proto',
   package='batchtank_messages',
-  serialized_pb='\n\x0f\x62\x61tchtank.proto\x12\x12\x62\x61tchtank_messages\"\xcf\x01\n\x0b\x42\x61seMessage\x12*\n\x06sample\x18\x01 \x03(\x0b\x32\x1a.batchtank_messages.Sample\x12\x31\n\x06signal\x18\x02 \x03(\x0b\x32!.batchtank_messages.ControlSignal\x12.\n\x08register\x18\x03 \x01(\x0b\x32\x1c.batchtank_messages.Register\x12\x31\n\tgetSensor\x18\x04 \x01(\x0e\x32\x1e.batchtank_messages.SensorType\"L\n\x08Register\x12,\n\x04type\x18\x01 \x03(\x0e\x32\x1e.batchtank_messages.SensorType\x12\x12\n\nperiodTime\x18\x02 \x01(\x01\"L\n\rControlSignal\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.OutputType\"E\n\x06Sample\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.SensorType*S\n\nSensorType\x12\x10\n\x0cHEATERSENSOR\x10\x00\x12\x10\n\x0c\x43OOLERSENSOR\x10\x01\x12\x0f\n\x0bINLETSENSOR\x10\x02\x12\x10\n\x0cOUTLETSENSOR\x10\x03*C\n\nOutputType\x12\n\n\x06HEATER\x10\x00\x12\n\n\x06\x43OOLER\x10\x01\x12\r\n\tINLETPUMP\x10\x02\x12\x0e\n\nOUTLETPUMP\x10\x03')
+  serialized_pb='\n\x0f\x62\x61tchtank.proto\x12\x12\x62\x61tchtank_messages\"\xe6\x01\n\x0b\x42\x61seMessage\x12*\n\x06sample\x18\x01 \x03(\x0b\x32\x1a.batchtank_messages.Sample\x12\x31\n\x06signal\x18\x02 \x03(\x0b\x32!.batchtank_messages.ControlSignal\x12.\n\x08register\x18\x03 \x01(\x0b\x32\x1c.batchtank_messages.Register\x12\x31\n\tgetSensor\x18\x04 \x01(\x0e\x32\x1e.batchtank_messages.SensorType\x12\x15\n\rendConnection\x18\x05 \x01(\x08\"L\n\x08Register\x12,\n\x04type\x18\x01 \x03(\x0e\x32\x1e.batchtank_messages.SensorType\x12\x12\n\nperiodTime\x18\x02 \x01(\x04\"L\n\rControlSignal\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.OutputType\"E\n\x06Sample\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.SensorType*S\n\nSensorType\x12\x10\n\x0cHEATERSENSOR\x10\x00\x12\x10\n\x0c\x43OOLERSENSOR\x10\x01\x12\x0f\n\x0bINLETSENSOR\x10\x02\x12\x10\n\x0cOUTLETSENSOR\x10\x03*C\n\nOutputType\x12\n\n\x06HEATER\x10\x00\x12\n\n\x06\x43OOLER\x10\x01\x12\r\n\tINLETPUMP\x10\x02\x12\x0e\n\nOUTLETPUMP\x10\x03')
 
 _SENSORTYPE = descriptor.EnumDescriptor(
   name='SensorType',
@@ -38,8 +38,8 @@ _SENSORTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=476,
-  serialized_end=559,
+  serialized_start=499,
+  serialized_end=582,
 )
 
 
@@ -68,8 +68,8 @@ _OUTPUTTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=561,
-  serialized_end=628,
+  serialized_start=584,
+  serialized_end=651,
 )
 
 
@@ -119,6 +119,13 @@ _BASEMESSAGE = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='endConnection', full_name='batchtank_messages.BaseMessage.endConnection', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -129,7 +136,7 @@ _BASEMESSAGE = descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=40,
-  serialized_end=247,
+  serialized_end=270,
 )
 
 
@@ -149,7 +156,7 @@ _REGISTER = descriptor.Descriptor(
       options=None),
     descriptor.FieldDescriptor(
       name='periodTime', full_name='batchtank_messages.Register.periodTime', index=1,
-      number=2, type=1, cpp_type=5, label=1,
+      number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -163,8 +170,8 @@ _REGISTER = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=249,
-  serialized_end=325,
+  serialized_start=272,
+  serialized_end=348,
 )
 
 
@@ -198,8 +205,8 @@ _CONTROLSIGNAL = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=327,
-  serialized_end=403,
+  serialized_start=350,
+  serialized_end=426,
 )
 
 
@@ -233,8 +240,8 @@ _SAMPLE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=405,
-  serialized_end=474,
+  serialized_start=428,
+  serialized_end=497,
 )
 
 _BASEMESSAGE.fields_by_name['sample'].message_type = _SAMPLE

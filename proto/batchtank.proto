@@ -19,6 +19,7 @@ message BaseMessage {
     repeated ControlSignal signal = 2;
     optional Register register = 3;
     optional SensorType getSensor = 4;
+    optional bool endConnection = 5;
 }
 
 // Used for registering for a period time etc. 

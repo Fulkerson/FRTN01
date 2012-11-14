@@ -5,11 +5,22 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#define DEBUG
+
+#ifndef D
+#ifdef DEBUG
+#define D
+#else
+#define D if(0)
+#endif
+#endif
+
 #include "batchtank_server.h"
 #include "utils.h"
 
 /* Used to silence compiler when unused vars. */
 #define UNUSED(expr) if(0) { (void)(expr); }
+
 
 using boost::asio::ip::tcp;
 using namespace batchtank;
@@ -36,6 +47,7 @@ PeriodicTask::~PeriodicTask()
 void
 PeriodicTask::start()
 {
+    D std::cout << "Starting periodic task" << std::endl;
     run = true;
     m_Thread = boost::thread(&PeriodicTask::execute, this);
 }
@@ -43,6 +55,7 @@ PeriodicTask::start()
 void
 PeriodicTask::stop()
 {
+    D std::cout << "Stopping periodic task" << std::endl;
     run = false;
     m_Thread.join();
 }
@@ -96,6 +109,12 @@ ConnectionThread::ConnectionThread(std::shared_ptr<tcp::socket> m_Socket) :
     m_Socket(m_Socket) {}
 
 
+ConnectionThread::~ConnectionThread()
+{
+    m_Socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    m_Socket->close();
+}
+
 void
 ConnectionThread::start()
 {
@@ -107,12 +126,12 @@ ConnectionThread::start()
 void
 ConnectionThread::run()
 {
+    std::string connected_to(m_Socket->remote_endpoint().address().to_string());
+
     try {
-        boost::posix_time::seconds periodTime(3);
         boost::system::error_code ignored_error;
 
         boost::asio::streambuf obuf;
-        boost::asio::streambuf ibuf;
         std::ostream os(&obuf);
        
         PeriodicTask periodic(100, [this, &obuf, &os]() {
@@ -121,20 +140,28 @@ ConnectionThread::run()
                 cos.WriteVarint64(100);
                 boost::asio::write(*m_Socket, obuf);
             });
-        periodic.start();
+        //periodic.start();
 
         messages::BaseMessage msg;
-        MessageParser<messages::BaseMessage> condition(msg, ibuf);
+        MessageIstream<messages::BaseMessage> parser(*m_Socket);
 
         while (true) {
             /* Parse delimited protobuf message */
-            int nbr_read = boost::asio::read(*m_Socket, ibuf, condition);
-            std::cout << "Number of bytes read: " << nbr_read << std::endl;
-            std::cout << "DEBUG: " << msg.DebugString() << std::endl;
+            parser >> msg;
+            D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
+
+            if (msg.has_endconnection() && msg.endconnection()) {
+                std::cerr << "Client: " << connected_to
+                    << " asks to gracefully end connection" << std::endl;
+                break;
+            }
+
+            msg.Clear();
         }
 
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
+        std::cerr << "Closing connection to: " << connected_to << std::endl;
     }
     delete this;
 }

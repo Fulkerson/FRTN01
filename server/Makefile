@@ -1,4 +1,4 @@
-CXXFLAGS += -std=c++11 -pipe -O0 -g -Wall -W -pedantic-errors
+CXXFLAGS += -std=c++11 -pipe -O3 -g -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
@@ -11,7 +11,7 @@ batchtank_server: batchtank_server.o batchtank.pb.o
 	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o $(LDLIBS) \
 		-o batchtank_server
 
-batchtank_server.o: batchtank_server.cc batchtank.pb.h
+batchtank_server.o: batchtank_server.cc batchtank.pb.h utils.h
 	$(CXX) -c $(CXXFLAGS) batchtank_server.cc -o batchtank_server.o
 
 batchtank.pb.o: batchtank.pb.cc

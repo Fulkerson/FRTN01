@@ -19,10 +19,10 @@ if not 'SerializeToSocket' in dir(google.protobuf.message.Message):
     def _monkey_wdelimit(self, soc):
         msg = self.SerializeToString()
         google.protobuf.internal.encoder._EncodeVarint(soc.send, len(msg))
-        #print "=================="
-        #print "Sending %s bytes of data" % len(msg)
-        #print self
-        #print "=================="
+        print "=================="
+        print "Sending %s bytes of data" % len(msg)
+        print self
+        print "=================="
         soc.send(msg)
 
     google.protobuf.message.Message.SerializeToSocket = _monkey_wdelimit
@@ -65,12 +65,15 @@ if not 'ParseFromSocket' in dir(google.protobuf.message.Message):
 def main():
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect(("localhost", 54000))
-    bm = batchtank_pb2.BaseMessage()
-    bm.register.periodTime = 1000
 
-    bm.SerializeToSocket(soc)
+    while True:
+        bm = batchtank_pb2.BaseMessage()
+        bm.register.periodTime = 2000
+        #bm.endConnection = True;
+        bm.SerializeToSocket(soc)
+        break
+    soc.close()
     while 1: pass
-
 
 if __name__ == "__main__":
     main()

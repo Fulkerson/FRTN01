@@ -12,6 +12,7 @@ namespace messages = batchtank_messages;
 class ConnectionThread {
     public:
         ConnectionThread(std::shared_ptr<boost::asio::ip::tcp::socket>);
+        ~ConnectionThread();
         void run();
         void start();
     private:

@@ -132,39 +132,54 @@ ConnectionThread::run()
         boost::system::error_code ignored_error;
 
         boost::asio::streambuf obuf;
-        std::ostream os(&obuf);
 
         AsioInputStream<tcp::socket> ais(*m_Socket);
-        google::protobuf::io::CopyingInputStreamAdaptor cis_adaptor(&ais);
-        google::protobuf::io::CodedInputStream cis(&cis_adaptor);
+        google::protobuf::io::CopyingInputStreamAdaptor cis_adp(&ais);
+        google::protobuf::io::CodedInputStream cis(&cis_adp);
        
-        PeriodicTask periodic(100, [this, &obuf, &os]() {
-                google::protobuf::io::OstreamOutputStream raw_os(&os);
-                google::protobuf::io::CodedOutputStream cos(&raw_os);
-                cos.WriteVarint64(100);
-                boost::asio::write(*m_Socket, obuf);
+        messages::BaseMessage send_msg;
+
+        PeriodicTask periodic(1000, [this, &send_msg]() {
+                /* Construct output stream */
+                AsioOutputStream<tcp::socket> aos(*m_Socket);
+                google::protobuf::io::CopyingOutputStreamAdaptor cos_adp(&aos);
+                /* CodedOutputStream will flush on destruction */
+                google::protobuf::io::CodedOutputStream cos(&cos_adp);
+
+                /* Construct message */
+                send_msg.Clear();
+                messages::Sample* sample = send_msg.add_sample();
+                sample->set_value(0.5);
+                sample->set_type(messages::SensorType::COOLERSENSOR);
+
+                /* Write delimited variant of message */
+                cos.WriteVarint32(send_msg.ByteSize());
+                send_msg.SerializeToCodedStream(&cos);
             });
-        //periodic.start();
+        periodic.start();
 
         messages::BaseMessage msg;
         uint32_t msg_size;
 
         while (true) {
+            msg.Clear();
+
             /* Parse delimited protobuf message */
             cis.ReadVarint32(&msg_size);
+            /* Make sure not to read beyond limit of one message */
             CodedInputStream::Limit msg_limit = cis.PushLimit(msg_size);
             msg.ParseFromCodedStream(&cis);
             
             cis.PopLimit(msg_limit);
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
 
+            /* Shut down gracefully */
             if (msg.has_endconnection() && msg.endconnection()) {
                 std::cerr << "Client: " << connected_to
                     << " asks to gracefully end connection" << std::endl;
                 break;
             }
 
-            msg.Clear();
         }
 
     } catch (std::exception& e) {

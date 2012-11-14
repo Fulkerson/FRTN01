@@ -1,4 +1,5 @@
 import socket
+import asyncore
 import time
 
 import batchtank_pb2
@@ -20,10 +21,10 @@ if not 'SerializeToSocket' in dir(google.protobuf.message.Message):
     def _monkey_wdelimit(self, soc):
         msg = self.SerializeToString()
         google.protobuf.internal.encoder._EncodeVarint(soc.send, len(msg))
-        print "=================="
-        print "Sending %s bytes of data" % len(msg)
-        print self
-        print "=================="
+        #print "=================="
+        #print "Sending %s bytes of data" % len(msg)
+        #print self
+        #print "=================="
         soc.send(msg)
 
     google.protobuf.message.Message.SerializeToSocket = _monkey_wdelimit
@@ -62,21 +63,43 @@ if not 'ParseFromSocket' in dir(google.protobuf.message.Message):
 ######### END ############
 ##########################
 
+class TestClient(asyncore.dispatcher):
+    def __init__(self, host, port):
+        asyncore.dispatcher.__init__(self)
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect((host, port))
 
-def main():
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.connect(("localhost", 54000))
-
-    for i in xrange(30):
+    def handle_read(self):
+        # self is a TCP socket 
+        print
+        print "==== handle_read ===="
         bm = batchtank_pb2.BaseMessage()
-        bm.register.periodTime = i*1000
-        #bm.endConnection = True;
-        bm.SerializeToSocket(soc)
-        time.sleep(1)
-    bm = batchtank_pb2.BaseMessage()
-    bm.endConnection = True;
-    bm.SerializeToSocket(soc)
-    soc.close()
+        bm.ParseFromSocket(self)
+        print bm
+        print "======== END ========"
+        print
+
+    def handle_write(self):
+    #    return
+        #print
+        #print "==== handle_write ===="
+    #    for i in xrange(20):
+    #        bm = batchtank_pb2.BaseMessage()
+    #        bm.register.periodTime = i*1000
+    #        bm.SerializeToSocket(self)
+    #        print bm
+    #        time.sleep(1)
+
+        bm = batchtank_pb2.BaseMessage()
+        bm.register.periodTime = 1000
+        bm.SerializeToSocket(self)
+        #print bm
+        #print "======== END ========="
+        #print
+
+
 
 if __name__ == "__main__":
-    main()
+    TestClient("localhost", 54000)
+    asyncore.loop()
+

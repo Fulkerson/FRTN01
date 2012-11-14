@@ -1,58 +1,72 @@
 #ifndef UTILS_H
 #define UTILS_H
-
-#ifndef D
-#ifdef DEBUG
-#define D
-#else
-#define D if(0)
-#endif
-#endif
-
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+
+//#define DEBUG_UTILS_H
 
 using namespace google::protobuf::io;
 using boost::asio::ip::tcp;
 
-template <class SocketService>
+template <typename SyncReadStream>
 class AsioInputStream : public CopyingInputStream {
     public:
-        AsioInputStream(SocketService& sock);
-        ~AsioInputStream();
+        AsioInputStream(SyncReadStream& sock);
         int Read(void* buffer, int size);
-        int Skip(int count);
     private:
-        SocketService& m_Socket;
+        SyncReadStream& m_Socket;
 };
 
-template <class SocketService>
-AsioInputStream<SocketService>::AsioInputStream(SocketService& sock) :
+template <typename SyncWriteStream>
+class AsioOutputStream : public CopyingOutputStream {
+    public:
+        AsioOutputStream(SyncWriteStream& sock);
+        bool Write(const void* buffer, int size);
+    private:
+        SyncWriteStream& m_Socket;
+};
+
+template <typename SyncReadStream>
+AsioInputStream<SyncReadStream>::AsioInputStream(SyncReadStream& sock) :
     m_Socket(sock) {}
 
-template <class SocketService>
-AsioInputStream<SocketService>::~AsioInputStream() {}
-
-template <class SocketService>
+template <typename SyncReadStream>
 int
-AsioInputStream<SocketService>::Read(void* buffer, int size)
+AsioInputStream<SyncReadStream>::Read(void* buffer, int size)
 {
+#ifdef DEBUG_UTILS_H
+    std::cout << "DEBUG: Trying to read " << size << " bytes" << std::flush;
+#endif
+
     std::size_t nbr_read;
-    D std::cout << "INFO: Trying to read " << size << " bytes" << std::flush;
     nbr_read = m_Socket.read_some(boost::asio::buffer(buffer, size));
-    D std::cout << " of which " << nbr_read << " was read." << std::endl;
-    
+
+#ifdef DEBUG_UTILS_H
+    std::cout << " of which " << nbr_read << " was read." << std::endl;
+#endif
+
     return nbr_read;
 }
 
-template <class SocketService>
-int
-AsioInputStream<SocketService>::Skip(int count)
+template <typename SyncWriteStream>
+AsioOutputStream<SyncWriteStream>::AsioOutputStream(SyncWriteStream& sock) :
+    m_Socket(sock) {}
+
+template <typename SyncWriteStream>
+bool
+AsioOutputStream<SyncWriteStream>::Write(const void* buffer, int size)
 {
-    std::size_t nbr_read = 0;
-    std::cerr << "WARNING: Trying to skip " << count << " bytes" << std::flush;
-    //nbr_read = m_Socket.read_some(boost::asio::buffer(NULL, count));
-    std::cerr << " of which " << nbr_read << " was skipped." << std::endl;
-    return nbr_read;
+#ifdef DEBUG_UTILS_H
+    std::cout << "DEBUG: Trying to write " << size << " bytes" << std::flush;
+#endif
+    
+    std::size_t nbr_written;
+    nbr_written = m_Socket.write_some(boost::asio::buffer(buffer, size));
+
+#ifdef DEBUG_UTILS_H
+    std::cout << " of which " << nbr_written << " was written." << std::endl;
+#endif
+
+    return !size || nbr_written != 0;
 }
 
 #endif

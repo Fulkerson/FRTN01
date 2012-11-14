@@ -1,0 +1,66 @@
+%\documentclass{tufte-handout}
+\documentclass{article}
+%\usepackage{amsmath,amsthm}
+\usepackage{fontspec}
+%\usepackage{unicode-math}
+%\setmathfont{Palatino Linotype}
+%\setmainfont{Palatino Linotype}
+%\usepackage{minted}
+%\usemintedstyle{bw}
+\usepackage{hyperref}
+
+\input{vc.tex}
+
+%\newtheorem{claim}{Claim}[section]
+\title{Control of Batch Tank using Raspberry Pi \\ FRTN01 project - Group 20}
+\date{\GITDate,\\\small\GITAbrHash}
+\author{Johan Anderholm \\ Jonathan Kämpe \\ Mikael Sahlström \\ Mikael Nilsson}
+
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\section{Problem description}
+% An introduction that states the problem that has been solved.
+
+\section{Program structure}
+% A section describing the main program structure, both from a class
+% and and a real-time perspective. If possible illustrate this with some
+% type of figure.
+
+\section{Control design}
+% A section describing the control design aspects of the project.
+\begin{description}
+\item[$m$] Building of color matrices
+\item[$2^n$] For all color combinations
+\item[$n^3$] Determinant calculation
+\item[$n^2$] Matrix addition/subtraction
+\end{description}
+
+
+\section{Running the system}
+% A section describing the user interface in the project including a short
+% HowTo description on how to start and operate the program.
+
+\section{Results}
+% A section containing the results. In case the project is a control-oriented
+% project this should include plots of measurement signals, reference sig-
+% nal, and control signal. If the project is more of a real-time nature then
+% this section could contain measurement results of different type.
+
+\section{Conclusion}
+% A conclusion section.
+
+Since the degree of the polynomial is at maximum n, by using Claim~2.1 in \cite[p.~2-1]{alistair} we get the bounded probability of less than $\frac{n}{p}$ where p is a previously fixed prime number.
+
+\newpage
+
+\begin{thebibliography}{9}
+\bibitem{alistair}
+\url{http://www.cs.berkeley.edu/~sinclair/cs271/n2.pdf}
+\bibitem{testset}
+\url{https://piazza.com/class#fall2012/edan55/50}
+\end{thebibliography}
+
+\end{document}

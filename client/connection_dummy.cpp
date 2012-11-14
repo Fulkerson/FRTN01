@@ -19,7 +19,7 @@ bool Connection::isUp(){
 
 double Connection::sendAndReceive(double u){
 	sleep(1);
-	std::cout << "sending " << u << " returning " << u << "\n";
-	return u-1;
+	std::cout << "sending " << u << " returning " << u + 1 << "\n";
+	return u+1;
 }
 

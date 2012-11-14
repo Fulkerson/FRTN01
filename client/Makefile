@@ -21,7 +21,7 @@ uninstall:
 
 test: $(OBJS) connection_dummy.o main.o 
 	$(CC) -o test $+ $(LDFLAGS)
-	./test url123url 1234
+	./test localhost 1337 3 2 1 1 -5 5
 	rm -f test
 
 clean:

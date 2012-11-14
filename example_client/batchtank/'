@@ -1,5 +1,4 @@
 import socket
-import time
 
 import batchtank_pb2
 
@@ -67,16 +66,13 @@ def main():
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect(("localhost", 54000))
 
-    for i in xrange(30):
+    for i in xrange(5):
         bm = batchtank_pb2.BaseMessage()
         bm.register.periodTime = i*1000
         #bm.endConnection = True;
         bm.SerializeToSocket(soc)
-        time.sleep(1)
-    bm = batchtank_pb2.BaseMessage()
-    bm.endConnection = True;
-    bm.SerializeToSocket(soc)
     soc.close()
+    while 1: pass
 
 if __name__ == "__main__":
     main()

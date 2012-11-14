@@ -133,6 +133,10 @@ ConnectionThread::run()
 
         boost::asio::streambuf obuf;
         std::ostream os(&obuf);
+
+        AsioInputStream<tcp::socket> ais(*m_Socket);
+        google::protobuf::io::CopyingInputStreamAdaptor cis_adaptor(&ais);
+        google::protobuf::io::CodedInputStream cis(&cis_adaptor);
        
         PeriodicTask periodic(100, [this, &obuf, &os]() {
                 google::protobuf::io::OstreamOutputStream raw_os(&os);
@@ -143,11 +147,15 @@ ConnectionThread::run()
         //periodic.start();
 
         messages::BaseMessage msg;
-        MessageIstream<messages::BaseMessage> parser(*m_Socket);
+        uint32_t msg_size;
 
         while (true) {
             /* Parse delimited protobuf message */
-            parser >> msg;
+            cis.ReadVarint32(&msg_size);
+            CodedInputStream::Limit msg_limit = cis.PushLimit(msg_size);
+            msg.ParseFromCodedStream(&cis);
+            
+            cis.PopLimit(msg_limit);
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
 
             if (msg.has_endconnection() && msg.endconnection()) {

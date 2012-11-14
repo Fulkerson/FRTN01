@@ -1,0 +1,1 @@
+ld -o test client.o connection_dummy.o main.o -L../lib -lcontrol

@@ -1,6 +1,4 @@
 
-CC=g++
-
 LIB_NAME=control
 OBJS= pid.o
 HEAD= pid.h
@@ -18,7 +16,7 @@ uninstall:
 	rm -rf $(INCLUDE_PATH)/$(LIB_NAME)
 
 test: all test.o 
-	$(CC) -o test test.o -L. -l$(LIB_NAME)
+	$(CXX) -o test test.o -L. -l$(LIB_NAME)
 	./test
 	rm -f test
 

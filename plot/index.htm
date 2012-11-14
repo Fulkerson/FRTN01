@@ -37,7 +37,7 @@
 					success: function(new_data) {
 						for (var key in new_data) {
 							if (data.length == 0) {
-								data.push({label: key, data: [new_data[key]]});
+								data.push({label: key, data: new_data[key]});
 							} else {
 								var i;
 								for (i = 0; i < data.length; i += 1) {
@@ -47,14 +47,14 @@
 										if (data[i]['data'].length > 20) {
 											data[i]['data'].shift();
 										}
-										data[i]['data'].push(new_data[key]);
+										data[i]['data'] = data[i]['data'].concat(new_data[key]);
 										break;
 									}
 								}
 
 								if (i == data.length) {
 									// New curve. Add to plot.
-									data.push({label: key, data: [new_data[key]]});
+									data.push({label: key, data: new_data[key]});
 								}
 							}
 						}

@@ -17,9 +17,13 @@ bool Connection::isUp(){
 	return ctr++ < 5;
 }
 
-double Connection::sendAndReceive(double u){
+void Connection::send(double u){
+	std::cout << "sending " << u << "\n";
+}
+
+double Connection::receive(){
 	sleep(1);
-	std::cout << "sending " << u << " returning " << u + 1 << "\n";
-	return u+1;
+	std::cout << "returning " << 1 << "\n";
+	return 1;
 }
 

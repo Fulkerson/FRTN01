@@ -11,6 +11,7 @@ class Connection{
 		Connection();
 		void setUp(const std::string,int);
 		bool isUp();
-		double sendAndReceive(double);
+		void send(double);
+		double receive();
 };
 #endif

@@ -11,8 +11,9 @@ void Client::work(){
 	double y = 0;
 	double u = 0;
 	while (this->conn->isUp()) {
-		y = this->conn->sendAndReceive(u);
+		y = this->conn->receive();
 		u = this->pid->next(y);
+		this->conn->send(u);
 	}
 }
 

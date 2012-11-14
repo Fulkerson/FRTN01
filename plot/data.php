@@ -1,8 +1,8 @@
 <?php
 /*
-	Awnser with data on json format {"ref":[12,37],"out":[5,12],"in":[2,52],...}.
-	The point given after curve name will be added to that curve (eg. [12,37] will be
-	added to the curve ref in the plot).
+	Awnser with data on json format {"ref":[[12,37], ...],"out":[[5,12], ...],"in":[[2,52], ...],...}.
+	The point given after curve name will be added to that curve (eg. [12,37] and optinally more
+	points will be added to the curve ref in the plot).
 
 	New curves can be added or skipped as pleased.
 

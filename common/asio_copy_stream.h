@@ -11,7 +11,7 @@
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
-//#define DEBUG_UTILS_H
+#define DEBUG_UTILS_H
 
 using namespace google::protobuf::io;
 using boost::asio::ip::tcp;
@@ -59,14 +59,29 @@ AsioInputStream<SyncReadStream>::Read(void* buffer, int size)
     std::cout << "DEBUG: Trying to read " << size << " bytes" << std::flush;
 #endif
 
-    std::size_t nbr_read;
-    nbr_read = m_Socket.read_some(boost::asio::buffer(buffer, size));
+    std::size_t bytes_read;
+    boost::system::error_code ec;
+    bytes_read = m_Socket.read_some(boost::asio::buffer(buffer, size), ec);
+
+    if(!ec) {
+        return bytes_read;
+    } else if (ec == boost::asio::error::eof) {
+        return 0;
+    } else {
+        return -1;
+    }
 
 #ifdef DEBUG_UTILS_H
-    std::cout << " of which " << nbr_read << " was read." << std::endl;
+    std::cout << " of which " << bytes_read << " was read." << std::endl;
 #endif
 
-    return nbr_read;
+    if(!ec) {
+        return bytes_read;
+    } else if (ec == boost::asio::error::eof) {
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 template <typename SyncWriteStream>
@@ -81,14 +96,15 @@ AsioOutputStream<SyncWriteStream>::Write(const void* buffer, int size)
     std::cout << "DEBUG: Trying to write " << size << " bytes" << std::flush;
 #endif
     
-    std::size_t nbr_written;
-    nbr_written = m_Socket.write_some(boost::asio::buffer(buffer, size));
+    std::size_t bytes_written;
+    boost::system::error_code ec;
+    bytes_written = m_Socket.write_some(boost::asio::buffer(buffer, size), ec);
 
 #ifdef DEBUG_UTILS_H
-    std::cout << " of which " << nbr_written << " was written." << std::endl;
+    std::cout << " of which " << bytes_written << " was written." << std::endl;
 #endif
 
-    return !size || nbr_written != 0;
+    return !ec;
 }
 
 }

@@ -165,10 +165,14 @@ ConnectionThread::run()
             msg.Clear();
 
             /* Parse delimited protobuf message */
-            cis.ReadVarint32(&msg_size);
+            if(!cis.ReadVarint32(&msg_size)) {
+                break;
+            }
             /* Make sure not to read beyond limit of one message */
             CodedInputStream::Limit msg_limit = cis.PushLimit(msg_size);
-            msg.ParseFromCodedStream(&cis);
+            if(!msg.ParseFromCodedStream(&cis)) {
+                break;
+            }
             
             cis.PopLimit(msg_limit);
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;

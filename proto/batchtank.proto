@@ -1,5 +1,7 @@
 package batchtank_messages;
 
+//option optimize_for = LITE_RUNTIME;
+
 enum SensorType {
     HEATERSENSOR = 0;
     COOLERSENSOR = 1;

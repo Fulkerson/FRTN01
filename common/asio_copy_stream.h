@@ -11,7 +11,7 @@
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
-#define DEBUG_UTILS_H
+//#define DEBUG_UTILS_H
 
 using namespace google::protobuf::io;
 using boost::asio::ip::tcp;
@@ -62,14 +62,6 @@ AsioInputStream<SyncReadStream>::Read(void* buffer, int size)
     std::size_t bytes_read;
     boost::system::error_code ec;
     bytes_read = m_Socket.read_some(boost::asio::buffer(buffer, size), ec);
-
-    if(!ec) {
-        return bytes_read;
-    } else if (ec == boost::asio::error::eof) {
-        return 0;
-    } else {
-        return -1;
-    }
 
 #ifdef DEBUG_UTILS_H
     std::cout << " of which " << bytes_read << " was read." << std::endl;

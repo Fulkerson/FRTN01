@@ -68,6 +68,7 @@ class TestClient(asyncore.dispatcher):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((host, port))
+        self.register = True
 
     def handle_read(self):
         # self is a TCP socket 
@@ -89,10 +90,13 @@ class TestClient(asyncore.dispatcher):
     #        bm.SerializeToSocket(self)
     #        print bm
     #        time.sleep(1)
-
-        bm = batchtank_pb2.BaseMessage()
-        bm.register.periodTime = 1000
-        bm.SerializeToSocket(self)
+        if self.register:
+            bm = batchtank_pb2.BaseMessage()
+            reg = batchtank_pb2.Register()
+            bm.register.periodTime = 1000
+            sensors = bm.register.type.append(batchtank_pb2.HEATERSENSOR)
+            bm.SerializeToSocket(self)
+            self.register = False
         #print bm
         #print "======== END ========="
         #print

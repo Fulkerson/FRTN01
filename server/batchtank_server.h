@@ -7,17 +7,38 @@
 namespace batchtank {
 
 /* message alias for protobuf messages. */
-namespace messages = batchtank_messages;
+namespace messages {
+    using namespace batchtank_messages;
+    /* TODO: I do not understand why Sensor is a pointer... */
+    typedef int SensorType;
+    typedef int OutputType;
+
+}
+
+
+/* Monitor class used to interface with the batch process. */
+class IORegistry {
+    public:
+        /* Used for locking when writing/reading to the batch process. */
+        boost::mutex mutex;
+        double getSensor(messages::SensorType);
+    private:
+        /* Signal copies, allow plotter to read control signals etc. */
+       int32_t inletpump;
+};
+
 
 class ConnectionThread {
     public:
-        ConnectionThread(std::shared_ptr<boost::asio::ip::tcp::socket>);
+        ConnectionThread(std::shared_ptr<boost::asio::ip::tcp::socket>,
+                IORegistry&);
         ~ConnectionThread();
         void run();
         void start();
     private:
         boost::thread m_Thread;
         std::shared_ptr<boost::asio::ip::tcp::socket> m_Socket;
+        IORegistry& ioreg;
 };
 
 class PeriodicTask {
@@ -35,17 +56,19 @@ class PeriodicTask {
         bool run;
 };
 
-/* Monitor class used to interface with the batch process. */
-class IORegistry {
+/* Function object used for sampling */
+class Sampler {
     public:
-        /* Used for locking when writing/reading to the batch process. */
-        boost::mutex mutex;
-
-
+        Sampler(std::vector<messages::SensorType>&, IORegistry&,
+                boost::asio::ip::tcp::socket&);
+        void operator()();
     private:
-        /* Signal copies, allow plotter to read control signals etc. */
-       int32_t inletpump;
+        messages::BaseMessage msg;
+        std::vector<messages::SensorType> sensors;
+        IORegistry& ioreg;
+        boost::asio::ip::tcp::socket& m_Socket;
 };
+
 }
 
 #endif

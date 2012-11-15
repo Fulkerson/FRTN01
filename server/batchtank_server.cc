@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <time.h>
@@ -35,6 +36,53 @@ add_timespec(timespec t1, timespec t2)
     t.tv_nsec = (t1.tv_nsec + t2.tv_nsec) % 999999999;
     return t;
 }
+
+
+double
+IORegistry::getSensor(messages::SensorType type)
+{
+    UNUSED(type);
+    return 2;
+}
+
+
+Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
+        tcp::socket& sock):
+    sensors(sensors), ioreg(ioreg), m_Socket(sock) {}
+
+
+void 
+Sampler::operator()()
+{
+    /* Construct output stream */
+    AsioOutputStream<tcp::socket> aos(m_Socket);
+    google::protobuf::io::CopyingOutputStreamAdaptor cos_adp(&aos);
+    /* CodedOutputStream will flush on destruction */
+    google::protobuf::io::CodedOutputStream cos(&cos_adp);
+
+    /* Construct message */
+    msg.Clear();
+
+    {
+        /* Sample and create message */
+        boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+        
+        std::for_each (sensors.begin(), sensors.end(),
+               [this](messages::SensorType type) {
+            messages::Sample* sample = msg.add_sample();
+            sample->set_value(ioreg.getSensor(type));
+            sample->set_type((messages::Sensor) type);
+        });
+    }
+
+    /* Write delimited variant of message */
+    cos.WriteVarint32(msg.ByteSize());
+    if (!msg.SerializeToCodedStream(&cos)) {
+        // TODO: Throw exception
+        std::cerr << "FAILED WRITE" << std::endl;
+    }
+}
+
 
 PeriodicTask::PeriodicTask(int32_t period, std::function<void()> task) :
     period(period), task(task){}
@@ -105,8 +153,8 @@ PeriodicTask::execute()
 }
 
 
-ConnectionThread::ConnectionThread(std::shared_ptr<tcp::socket> m_Socket) :
-    m_Socket(m_Socket) {}
+ConnectionThread::ConnectionThread(std::shared_ptr<tcp::socket> m_Socket,
+        IORegistry& ioreg):  m_Socket(m_Socket), ioreg(ioreg) {}
 
 
 ConnectionThread::~ConnectionThread()
@@ -114,6 +162,7 @@ ConnectionThread::~ConnectionThread()
     m_Socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     m_Socket->close();
 }
+
 
 void
 ConnectionThread::start()
@@ -129,34 +178,11 @@ ConnectionThread::run()
     std::string connected_to(m_Socket->remote_endpoint().address().to_string());
 
     try {
-        boost::system::error_code ignored_error;
-
-        boost::asio::streambuf obuf;
-
         AsioInputStream<tcp::socket> ais(*m_Socket);
         google::protobuf::io::CopyingInputStreamAdaptor cis_adp(&ais);
         google::protobuf::io::CodedInputStream cis(&cis_adp);
        
-        messages::BaseMessage send_msg;
-
-        PeriodicTask periodic(1000, [this, &send_msg]() {
-                /* Construct output stream */
-                AsioOutputStream<tcp::socket> aos(*m_Socket);
-                google::protobuf::io::CopyingOutputStreamAdaptor cos_adp(&aos);
-                /* CodedOutputStream will flush on destruction */
-                google::protobuf::io::CodedOutputStream cos(&cos_adp);
-
-                /* Construct message */
-                send_msg.Clear();
-                messages::Sample* sample = send_msg.add_sample();
-                sample->set_value(0.5);
-                sample->set_type(messages::SensorType::COOLERSENSOR);
-
-                /* Write delimited variant of message */
-                cos.WriteVarint32(send_msg.ByteSize());
-                send_msg.SerializeToCodedStream(&cos);
-            });
-        periodic.start();
+        std::unique_ptr<PeriodicTask> sampler;
 
         messages::BaseMessage msg;
         uint32_t msg_size;
@@ -176,6 +202,21 @@ ConnectionThread::run()
             
             cis.PopLimit(msg_limit);
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
+
+            /* Handle register for new sensors message */
+            if (msg.has_register_()) {
+                D std::cout << "Got registration" << std::endl;
+                const messages::Register& r =  msg.register_();
+
+                auto repeated  = r.type();
+                std::vector<messages::SensorType> sensors(repeated.begin(),
+                        repeated.end());
+
+                /* Replace periodic timer */
+                sampler.reset(new PeriodicTask(r.periodtime(),
+                            Sampler(sensors, ioreg, *m_Socket)));
+                sampler->start();
+            }
 
             /* Shut down gracefully */
             if (msg.has_endconnection() && msg.endconnection()) {
@@ -198,6 +239,9 @@ int
 main()
 {
     try {
+        /* IO monitor for batchtank process */
+        IORegistry ioreg;
+
         boost::asio::io_service io_service;
         tcp::endpoint endpoint(tcp::v4(), 54000);
         tcp::acceptor acceptor(io_service, endpoint);
@@ -206,7 +250,7 @@ main()
             std::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));
             acceptor.accept(*socket);
 
-            (new ConnectionThread(socket))->start();
+            (new ConnectionThread(socket, ioreg))->start();
         }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;

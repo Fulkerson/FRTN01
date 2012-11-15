@@ -11,11 +11,11 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='batchtank.proto',
   package='batchtank_messages',
-  serialized_pb='\n\x0f\x62\x61tchtank.proto\x12\x12\x62\x61tchtank_messages\"\xe6\x01\n\x0b\x42\x61seMessage\x12*\n\x06sample\x18\x01 \x03(\x0b\x32\x1a.batchtank_messages.Sample\x12\x31\n\x06signal\x18\x02 \x03(\x0b\x32!.batchtank_messages.ControlSignal\x12.\n\x08register\x18\x03 \x01(\x0b\x32\x1c.batchtank_messages.Register\x12\x31\n\tgetSensor\x18\x04 \x01(\x0e\x32\x1e.batchtank_messages.SensorType\x12\x15\n\rendConnection\x18\x05 \x01(\x08\"L\n\x08Register\x12,\n\x04type\x18\x01 \x03(\x0e\x32\x1e.batchtank_messages.SensorType\x12\x12\n\nperiodTime\x18\x02 \x01(\x04\"L\n\rControlSignal\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.OutputType\"E\n\x06Sample\x12\r\n\x05value\x18\x01 \x02(\x01\x12,\n\x04type\x18\x02 \x02(\x0e\x32\x1e.batchtank_messages.SensorType*S\n\nSensorType\x12\x10\n\x0cHEATERSENSOR\x10\x00\x12\x10\n\x0c\x43OOLERSENSOR\x10\x01\x12\x0f\n\x0bINLETSENSOR\x10\x02\x12\x10\n\x0cOUTLETSENSOR\x10\x03*C\n\nOutputType\x12\n\n\x06HEATER\x10\x00\x12\n\n\x06\x43OOLER\x10\x01\x12\r\n\tINLETPUMP\x10\x02\x12\x0e\n\nOUTLETPUMP\x10\x03')
+  serialized_pb='\n\x0f\x62\x61tchtank.proto\x12\x12\x62\x61tchtank_messages\"\xe2\x01\n\x0b\x42\x61seMessage\x12*\n\x06sample\x18\x01 \x03(\x0b\x32\x1a.batchtank_messages.Sample\x12\x31\n\x06signal\x18\x02 \x03(\x0b\x32!.batchtank_messages.ControlSignal\x12.\n\x08register\x18\x03 \x01(\x0b\x32\x1c.batchtank_messages.Register\x12-\n\tgetSensor\x18\x04 \x01(\x0e\x32\x1a.batchtank_messages.Sensor\x12\x15\n\rendConnection\x18\x05 \x01(\x08\"H\n\x08Register\x12(\n\x04type\x18\x01 \x03(\x0e\x32\x1a.batchtank_messages.Sensor\x12\x12\n\nperiodTime\x18\x02 \x02(\x04\"H\n\rControlSignal\x12\r\n\x05value\x18\x01 \x02(\x01\x12(\n\x04type\x18\x02 \x02(\x0e\x32\x1a.batchtank_messages.Output\"A\n\x06Sample\x12\r\n\x05value\x18\x01 \x02(\x01\x12(\n\x04type\x18\x02 \x02(\x0e\x32\x1a.batchtank_messages.Sensor*O\n\x06Sensor\x12\x10\n\x0cHEATERSENSOR\x10\x00\x12\x10\n\x0c\x43OOLERSENSOR\x10\x01\x12\x0f\n\x0bINLETSENSOR\x10\x02\x12\x10\n\x0cOUTLETSENSOR\x10\x03*?\n\x06Output\x12\n\n\x06HEATER\x10\x00\x12\n\n\x06\x43OOLER\x10\x01\x12\r\n\tINLETPUMP\x10\x02\x12\x0e\n\nOUTLETPUMP\x10\x03')
 
-_SENSORTYPE = descriptor.EnumDescriptor(
-  name='SensorType',
-  full_name='batchtank_messages.SensorType',
+_SENSOR = descriptor.EnumDescriptor(
+  name='Sensor',
+  full_name='batchtank_messages.Sensor',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -38,14 +38,14 @@ _SENSORTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=499,
-  serialized_end=582,
+  serialized_start=483,
+  serialized_end=562,
 )
 
 
-_OUTPUTTYPE = descriptor.EnumDescriptor(
-  name='OutputType',
-  full_name='batchtank_messages.OutputType',
+_OUTPUT = descriptor.EnumDescriptor(
+  name='Output',
+  full_name='batchtank_messages.Output',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -68,8 +68,8 @@ _OUTPUTTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=584,
-  serialized_end=651,
+  serialized_start=564,
+  serialized_end=627,
 )
 
 
@@ -136,7 +136,7 @@ _BASEMESSAGE = descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=40,
-  serialized_end=270,
+  serialized_end=266,
 )
 
 
@@ -156,7 +156,7 @@ _REGISTER = descriptor.Descriptor(
       options=None),
     descriptor.FieldDescriptor(
       name='periodTime', full_name='batchtank_messages.Register.periodTime', index=1,
-      number=2, type=4, cpp_type=4, label=1,
+      number=2, type=4, cpp_type=4, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -170,8 +170,8 @@ _REGISTER = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=272,
-  serialized_end=348,
+  serialized_start=268,
+  serialized_end=340,
 )
 
 
@@ -205,8 +205,8 @@ _CONTROLSIGNAL = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=350,
-  serialized_end=426,
+  serialized_start=342,
+  serialized_end=414,
 )
 
 
@@ -240,17 +240,17 @@ _SAMPLE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=428,
-  serialized_end=497,
+  serialized_start=416,
+  serialized_end=481,
 )
 
 _BASEMESSAGE.fields_by_name['sample'].message_type = _SAMPLE
 _BASEMESSAGE.fields_by_name['signal'].message_type = _CONTROLSIGNAL
 _BASEMESSAGE.fields_by_name['register'].message_type = _REGISTER
-_BASEMESSAGE.fields_by_name['getSensor'].enum_type = _SENSORTYPE
-_REGISTER.fields_by_name['type'].enum_type = _SENSORTYPE
-_CONTROLSIGNAL.fields_by_name['type'].enum_type = _OUTPUTTYPE
-_SAMPLE.fields_by_name['type'].enum_type = _SENSORTYPE
+_BASEMESSAGE.fields_by_name['getSensor'].enum_type = _SENSOR
+_REGISTER.fields_by_name['type'].enum_type = _SENSOR
+_CONTROLSIGNAL.fields_by_name['type'].enum_type = _OUTPUT
+_SAMPLE.fields_by_name['type'].enum_type = _SENSOR
 DESCRIPTOR.message_types_by_name['BaseMessage'] = _BASEMESSAGE
 DESCRIPTOR.message_types_by_name['Register'] = _REGISTER
 DESCRIPTOR.message_types_by_name['ControlSignal'] = _CONTROLSIGNAL

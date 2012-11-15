@@ -194,8 +194,6 @@ ConnectionThread::ConnectionThread(std::shared_ptr<tcp::socket> m_Socket,
 
 ConnectionThread::~ConnectionThread()
 {
-    m_Socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    m_Socket->close();
 }
 
 

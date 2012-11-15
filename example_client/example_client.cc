@@ -1,13 +1,8 @@
 #include <string>
 #include <boost/asio.hpp>
 
-#include "batchtank.pb.h"
+#include "example_client.h"
 #include "../common/message_utils.h"
-
-namespace batchtank {
-    /* Convenience alias */
-    namespace messages = batchtank_messages;
-}
 
 using boost::asio::ip::tcp;
 using namespace batchtank;

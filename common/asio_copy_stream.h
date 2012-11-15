@@ -1,5 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
+
+/*!
+ *  \file asio_copy_stream.h
+ *
+ *  Implementations of google::protobuf::io::CopyingInputStream and
+ *  google::protobuf::io::CopyingOutputStream for use with the
+ *  synchronized parts of boost::asio.
+ */
+
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
 //#define DEBUG_UTILS_H
@@ -7,6 +16,13 @@
 using namespace google::protobuf::io;
 using boost::asio::ip::tcp;
 
+namespace batchtank {
+
+/*!
+ * Used together with google::protobuf::io::CopyingInputStreamAdaptor
+ * to create a ZeroCopyInputStream using a synchronous read stream:
+ * http://www.boost.org/doc/libs/1_50_0/doc/html/boost_asio/reference/SyncReadStream.html
+ */
 template <typename SyncReadStream>
 class AsioInputStream : public CopyingInputStream {
     public:
@@ -16,6 +32,12 @@ class AsioInputStream : public CopyingInputStream {
         SyncReadStream& m_Socket;
 };
 
+
+/*!
+ * Used together with google::protobuf::io::CopyingOutputStreamAdaptor
+ * to create a ZeroCopyOutputStream using a synchronous write stream:
+ * http://www.boost.org/doc/libs/1_50_0/doc/html/boost_asio/reference/SyncWriteStream.html
+ */
 template <typename SyncWriteStream>
 class AsioOutputStream : public CopyingOutputStream {
     public:
@@ -67,6 +89,8 @@ AsioOutputStream<SyncWriteStream>::Write(const void* buffer, int size)
 #endif
 
     return !size || nbr_written != 0;
+}
+
 }
 
 #endif

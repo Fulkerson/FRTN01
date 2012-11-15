@@ -16,7 +16,7 @@
 #endif
 
 #include "batchtank_server.h"
-#include "utils.h"
+#include "../common/asio_copy_stream.h"
 
 /* Used to silence compiler when unused vars. */
 #define UNUSED(expr) if(0) { (void)(expr); }

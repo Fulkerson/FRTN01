@@ -12,12 +12,11 @@ main()
 {
     try {
         boost::asio::io_service io_service;
-        tcp::resolver resolver(io_service);
-        tcp::resolver::query query(tcp::v4(), "localhost", "54000");
-        auto endpoint_iterator = resolver.resolve(query);
+        boost::asio::ip::tcp::endpoint endpoint(
+                boost::asio::ip::address::from_string("127.0.0.1"), 54000);
 
         tcp::socket socket(io_service);
-        boost::asio::connect(socket, endpoint_iterator);
+        socket.connect(endpoint);
         std::cout << "Connected" << std::endl;
 
         /* Socket to protobuf glue */
@@ -26,7 +25,7 @@ main()
         /* First register for sensor data */
         messages::BaseMessage msg;
         messages::Register* reg = msg.mutable_register_();
-        reg->set_periodtime(1000);
+        reg->set_periodtime(50);
         reg->add_type(messages::HEATERSENSOR);
         
         /* Send message */

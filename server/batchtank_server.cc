@@ -6,7 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef D
 #ifdef DEBUG
@@ -17,7 +17,7 @@
 #endif
 
 #include "batchtank_server.h"
-#include "../common/asio_copy_stream.h"
+#include "../common/message_utils.h"
 
 /* Used to silence compiler when unused vars. */
 #define UNUSED(expr) if(0) { (void)(expr); }
@@ -41,9 +41,52 @@ add_timespec(timespec t1, timespec t2)
 double
 IORegistry::getSensor(messages::SensorType type)
 {
-    UNUSED(type);
+    std::cout << "GET ";
+    switch(type) {
+        case messages::HEATERSENSOR:
+            std::cout << "HEATERSENSOR: ";
+            break;
+        case messages::COOLERSENSOR:
+            std::cout << "COOLERSENSOR: ";
+            break;
+        case messages::INLETSENSOR:
+            std::cout << "INLETSENSOR: ";
+            break;
+        case messages::OUTLETSENSOR:
+            std::cout << "OUTLETSENSOR: ";
+            break;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            break;
+    }
+    std::cout << 2 << std::endl;
     return 2;
 }
+
+void
+IORegistry::setSensor(messages::SensorType type, double value)
+{
+    std::cout << "SET ";
+    switch(type) {
+        case messages::HEATER:
+            std::cout << "HEATER: ";
+            break;
+        case messages::COOLER:
+            std::cout << "COOLER: ";
+            break;
+        case messages::INLETPUMP:
+            std::cout << "INLETPUMP: ";
+            break;
+        case messages::OUTLETPUMP:
+            std::cout << "OUTLETPUMP: ";
+            break;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            break;
+    }
+    std::cout << value << std::endl;
+}
+
 
 
 Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
@@ -55,10 +98,7 @@ void
 Sampler::operator()()
 {
     /* Construct output stream */
-    AsioOutputStream<tcp::socket> aos(m_Socket);
-    google::protobuf::io::CopyingOutputStreamAdaptor cos_adp(&aos);
-    /* CodedOutputStream will flush on destruction */
-    google::protobuf::io::CodedOutputStream cos(&cos_adp);
+    MessageOutput<messages::BaseMessage, tcp::socket> out(m_Socket);
 
     /* Construct message */
     msg.Clear();
@@ -75,12 +115,7 @@ Sampler::operator()()
         });
     }
 
-    /* Write delimited variant of message */
-    cos.WriteVarint32(msg.ByteSize());
-    if (!msg.SerializeToCodedStream(&cos)) {
-        // TODO: Throw exception
-        std::cerr << "FAILED WRITE" << std::endl;
-    }
+    out << msg;
 }
 
 
@@ -178,30 +213,29 @@ ConnectionThread::run()
     std::string connected_to(m_Socket->remote_endpoint().address().to_string());
 
     try {
-        AsioInputStream<tcp::socket> ais(*m_Socket);
-        google::protobuf::io::CopyingInputStreamAdaptor cis_adp(&ais);
-        google::protobuf::io::CodedInputStream cis(&cis_adp);
+        MessageInput<messages::BaseMessage, tcp::socket> in(*m_Socket);
        
         std::unique_ptr<PeriodicTask> sampler;
 
         messages::BaseMessage msg;
-        uint32_t msg_size;
 
         while (true) {
             msg.Clear();
 
-            /* Parse delimited protobuf message */
-            if(!cis.ReadVarint32(&msg_size)) {
-                break;
-            }
-            /* Make sure not to read beyond limit of one message */
-            CodedInputStream::Limit msg_limit = cis.PushLimit(msg_size);
-            if(!msg.ParseFromCodedStream(&cis)) {
-                break;
-            }
-            
-            cis.PopLimit(msg_limit);
+            /* Parse message */
+            in >> msg;
+
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
+
+            auto start = msg.signal().begin();
+            auto end = msg.signal().end();
+            
+            {
+                boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+                std::for_each (start, end, [this](messages::ControlSignal c) {
+                    ioreg.setSensor(c.type(), c.value());
+                });
+            }
 
             /* Handle register for new sensors message */
             if (msg.has_register_()) {

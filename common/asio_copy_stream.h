@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef ASIO_COPY_STREAM
+#define ASIO_COPY_STREAM
 
 /*!
  *  \file asio_copy_stream.h

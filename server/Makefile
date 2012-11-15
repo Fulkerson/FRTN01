@@ -11,7 +11,7 @@ batchtank_server: batchtank_server.o batchtank.pb.o
 	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o $(LDLIBS) \
 		-o batchtank_server
 
-batchtank_server.o: batchtank_server.cc batchtank.pb.h ../common/asio_copy_stream.h
+batchtank_server.o: batchtank_server.cc batchtank.pb.h ../common/message_utils.h
 	$(CXX) -c $(CXXFLAGS) batchtank_server.cc -o batchtank_server.o
 
 batchtank.pb.o: batchtank.pb.cc

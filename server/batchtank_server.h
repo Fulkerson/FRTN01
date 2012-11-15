@@ -22,6 +22,7 @@ class IORegistry {
         /* Used for locking when writing/reading to the batch process. */
         boost::mutex mutex;
         double getSensor(messages::SensorType);
+        void setSensor(messages::SensorType, double value);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
        int32_t inletpump;

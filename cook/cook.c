@@ -1,165 +1,96 @@
 #include <termios.h>
+#include <error.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> 
+#include <sys/ioctl.h>
+
+#include "cook.h"
 
 #define CONFIG_CHAN	(31)
-#define TEMP_CHAN	(1)
+#define ERROR_bit	(0x80)
 
-typedef enum { cmd_clear_bit, cmd_set_bit,
-cmd_read_bit, cmd_read_chan } command;
+enum command { 
+	cmd_clear_bit, 
+	cmd_set_bit,
+	cmd_read_bit, 
+	cmd_read_chan 
+};
 
-void error(const char* msg)
+static int fd = -1;
+static struct termios  config;
+
+int init(const char* path)
 {
-	fprintf(stderr,"%s\n", msg);
-	exit(1);
-}
 
-void config(int fd)
-{
-	struct termios  config;
+	fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
 
-	if (-1 == fd)
-		error("file descriptor is bad");
+	if (-1 == fd) 
+		return -1;
 
 	if (!isatty(fd)) 
-		error("atty failed");
-	//
-	// Input flags - Turn off input processing
-	// convert break to null byte, no CR to NL translation,
-	// no NL to CR translation, don't mark parity errors or breaks
-	// no input parity check, don't strip high bit off,
-	// no XON/XOFF software flow control
-	//
-
+		return -1;
 
     	tcgetattr(fd, &config);
-	
-	//config.c_iflag &= ~(IGNBRK | BRKINT | ICRNL |
-			   //INLCR | PARMRK | INPCK | ISTRIP | IXON);
-	//
-	// Output flags - Turn off output processing
-	// no CR to NL translation, no NL to CR-NL translation,
-	// no NL to CR translation, no column 0 CR suppression,
-	// no Ctrl-D suppression, no fill characters, no case mapping,
-	// no local output processing
-	//
-	// config.c_oflag &= ~(OCRNL | ONLCR | ONLRET |
-	//                   options  ONOCR | ONOEOT| OFILL | OLCUC | OPOST);
 
-	config.c_oflag = 0;
-	//
-	// No line processing:
-	// echo off, echo newline off, canonical mode off, 
-	// extended input processing off, signal chars off
-	//
-	config.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
-	//
-	// Turn off character processing
-	// clear current char size mask, no parity checking,
-	// no output processing, force 8 bit input
-	//
+	/* NO parity */
+	config.c_cflag &= ~PARENB;
+	config.c_cflag &= ~CSTOPB;
+	config.c_cflag &= ~CSIZE;
+	config.c_cflag |= CS8;
+
+
+	if (cfsetispeed(&config, B115200) < 0 || cfsetospeed(&config, B115200) < 0) 
+		return -1;
+
 	config.c_cflag |= (CLOCAL | CREAD);
-	//config.c_cflag &= ~(CSIZE | PARENB);
-	//config.c_cflag |= CS8;
-	//
-	// One input byte is enough to return from read()
-	// Inter-character timer off
-	//
-	config.c_cc[VMIN]  = 1;
-	config.c_cc[VTIME] = 0;
-	//
-	// Communication speed (simple version, using the predefined
-	// constants)
-	//
-	if(cfsetispeed(&config, B9600) < 0 || cfsetospeed(&config, B9600) < 0) 
-		error("Yes, this is dog");
-	//
-	// Finally, apply the configuration
-	//
-	if(tcsetattr(fd, TCSAFLUSH, &config) < 0) 
-		error("Yes, this is not dog");
 
+	config.c_oflag &= ~OPOST;
+
+	if (tcsetattr(fd, TCSAFLUSH, &config) < 0) 
+		return -1;
+
+	return 1;
 }
 
-void print_byte(unsigned char data)
+int get(enum channel chan)
 {
-	int i;
-
-	for (i = 0; i < 8; i+=1) {
-		if (data & (1 << i))
-			printf("1");
-		else 	
-			printf("0");
-	}
-	printf("\r\n");
-	
-}
-void read_cook(unsigned char* buff, int fp)
-{
-	int	c;
-	int	i;
-
-	if(!(c = read(fp, buff, 1)))
-		error("Read failed");
-
-	print_byte(c);
-	while (c != 0 && i < 100) {
-		print_byte(c);
-		buff[i] = c;
-		i += 1;
-	if(!(c = read(fp, buff + i, 1)))
-		error("Read failed");
-	}
-}
-
-
-int main(int args, const char** argv)
-{
-	int		fd;
-	int		c;
 	unsigned char	data;
-	unsigned char	in_data;
-	unsigned char 	buff[100];
+	unsigned char 	ret[50] = { 0 };
+	int		avail = 0;
+	
+	data = 0;
+	data |= 31;
+	data |= 3 << 5;
 
-	printf("writing / reading do: %s\n", argv[1]);	
+	if (-1 == write(fd, &data, 1))
+		printf("write failed\n");
 
-	fd = open(argv[1], O_RDWR | O_NOCTTY | O_NDELAY);
-	config(fd);
-
-
-
-	/* a = get_temperature */	
-	while ('q' != (c = getchar())) {
-		data = 0;
-		switch (c) {
-			case 'a':
-				data |= cmd_read_chan << 5;
-				data |= CONFIG_CHAN;
-				print_byte(data);
-				data = 0;
-				data = 495;
-				if (!write(fd, &data, 1))
-					error("Write failed");
-				read_cook(buff, fd);
-
-				print_byte(in_data);
-			break;
-			case 'b':
-				/* set cmd to get */
-				data |= cmd_read_chan << 5;
-				/* get config */
-				data |= TEMP_CHAN;
-				if (!write(fd, &data, 1))
-					error("Write failed");
-				read_cook(buff, fd);
-
-				print_byte(in_data);
-			break;
-		}
+	
+	while (!avail) {	
+		ioctl(fd, FIONREAD, &avail);
 	}
 
-	close(fd);
+
+	if (-1 == read(fd, ret, 50))
+		perror(""); 
+
+	for (int i = 0; i < 50; i+=1)
+		printf("%d\n", ret[i]);
+
+	return ret[0];
+}
+
+int set(enum channel chan, int value)
+{
+
 	return 0;
 }
+
+int destroy(void)
+{
+	return close(fd);
+}
+
+

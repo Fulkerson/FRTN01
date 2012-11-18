@@ -1,4 +1,7 @@
 
+#ifndef CLIENT_H
+#define CLIENT_H
+
 #include <control/pid.h>
 #include "connection.h"
 
@@ -7,6 +10,8 @@ class Client{
 		Connection* conn;
 		PID* pid;
 	public:
-		Client(Connection*, PID*);	
+		Client(std::string, int, PID*);	
 		void work();
 };
+
+#endif

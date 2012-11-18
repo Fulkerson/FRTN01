@@ -1,11 +1,10 @@
 #include "client.h"
-#include "connection.h"
 #include <iostream>
 #include <stdlib.h>
 
 int main(int argc, char* argv[]){
-	std::string u = std::string("localhost");
-	int p = 1234;
+	std::string u = std::string("127.0.0.1");
+	int p = 54000;
 	double pp[] = {1,1,1,1,1,1};	
 
 	if (argc == 2) {
@@ -25,9 +24,7 @@ int main(int argc, char* argv[]){
 		std::cout << "\t" << pp[i];
 	std::cout << "\n";
 	
-	Connection* conn = new Connection();
 	PID* pid = new PID(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5]);	
-	conn->setUp(u,p);
-	Client* c = new Client(conn, pid);
+	Client* c = new Client(u, p, pid);
 	c->work();
 }

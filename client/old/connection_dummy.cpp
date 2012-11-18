@@ -4,13 +4,11 @@
 
 int ctr = 0;
 
-Connection::Connection(){
-	
-}
-
-void Connection::setUp(const std::string url, int port){
+Connection::Connection(std::string u, int p){
+	this->url = u;
+	this->port = p;
 	std::cout << "This is a dummy connection." << "\n";
-	std::cout << "Url:" << url <<  " Port:" << port  << "\n";
+	std::cout << "Url:" << this->url <<  " Port:" << this->port  << "\n";
 }
 
 bool Connection::isUp(){

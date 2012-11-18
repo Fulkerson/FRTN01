@@ -2,8 +2,8 @@
 #include "client.h"
 
 
-Client::Client(Connection* conn, PID* pid){
-	this->conn = conn;
+Client::Client(std::string u, int p, PID* pid){
+	this->conn = new Connection(u,p);
 	this->pid = pid;
 }
 

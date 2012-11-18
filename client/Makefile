@@ -5,9 +5,9 @@
 BIN_NAME= client
 PROTO_DIR = ../proto
 
+INCLUDE_PATH=.
+LIB_PATH=control
 # Define if not defined
-INCLUDE_PATH?=../include
-LIB_PATH?=../lib
 BIN_PATH?=../bin
 
 CXXFLAGS += -std=c++0x -pipe -O0 -g -Wall -W -pedantic-errors
@@ -19,9 +19,13 @@ LDFLAGS+= -L$(LIB_PATH) -lcontrol -lprotobuf -lboost_system
 LDFLAGS+= -lboost_thread-mt -lrt
 
 OBJS= batchtank.pb.o main.o
+SUB_DIRS= control connection
 
 all: $(OBJS)
-	$(CXX) -o $(BIN_NAME) $+ $(LDFLAGS) 
+	for DIR in $(SUB_DIRS); do \
+		cd $(PWD)/$$DIR && make; \
+	done
+	$(CXX) -o $(BIN_NAME) $(OBJS) $(LDFLAGS) 
 
 install:
 	cp $(BIN_NAME) $(BIN_PATH)
@@ -30,6 +34,9 @@ uninstall:
 	rm -f $(BIN_PATH)/$(BIN_NAME)
 
 clean: protoclean
+	for DIR in $(SUB_DIRS); do \
+		cd $(PWD)/$$DIR && make clean; \
+	done
 	rm -f *.o $(BIN_NAME)
 
 main.o: main.cc batchtank.pb.h ../common/message_utils.h
@@ -43,5 +50,5 @@ batchtank.pb.h: batchtank.pb.cc
 batchtank.pb.cc: $(PROTO_DIR)/batchtank.proto
 	protoc -I=$(PROTO_DIR) $(PROTO_DIR)/batchtank.proto --cpp_out=.
 
-protoclean: clean
+protoclean:
 	rm -rf batchtank.pb.h batchtank.pb.cc

@@ -25,19 +25,19 @@ int main(int argc, const char* argv[]) {
 
 	if (argc == 0) {
 		std::cout << "Running on standard params\n";
-	}
-	
-	if (argc == 2) {
+	} else if (argc == 2) {
 		std::cout << "File parsing not implemented\n"
-			<< "Using standard url:port\n";
-	}
-	if (argc == 10) {
+			<< "Using standard params\n";
+	} else if (argc == 10) {
 		ip = std::string(argv[1]);
 		port = atoi(argv[2]);
 		period = atoi(argv[3]);
 		for(int i = 0; i < 6; i++)
 			pp[i] = atoi(argv[i+4]);
 		std::cout << "Parsed command line parameters:\n";
+	} else {
+		std::cout << "Usage: ./client ip port period K Ti Td yref umin umax\n";
+		return 0;	
 	}
 	
 	std::cout << "\t" << ip << ":" << port << "\t" << period << "\n";

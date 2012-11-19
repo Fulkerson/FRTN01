@@ -18,25 +18,37 @@ using namespace batchtank;
 int main(int argc, const char* argv[]) {
 
 	// Parse some args
-	std::string ip = std::string("127.0.0.1");
+	std::string ip("127.0.0.1");
 	int port = 54000;
 	int period = 50;
+	messages::Sensor sensor = messages::HEATERSENSOR;
+	
 	double pp[] = {1,2,1,2,-5,5};	
 
-	if (argc == 0) {
+	if (argc == 2 && atoi(argv[1]) == 0) {
 		std::cout << "Running on standard params\n";
-	} else if (argc == 2) {
-		std::cout << "File parsing not implemented\n"
-			<< "Using standard params\n";
-	} else if (argc == 10) {
+	} else if (argc == 11) {
 		ip = std::string(argv[1]);
 		port = atoi(argv[2]);
-		period = atoi(argv[3]);
+		std::string sens(argv[3]);
+		period = atoi(argv[4]);
+
+		if (sens == "HEAT")
+			sensor = messages::HEATERSENSOR;
+		else if (sens == "COOL")
+			sensor = messages::COOLERSENSOR;
+		else if (sens == "IN")
+			sensor = messages::INLETSENSOR;
+		else if (sens == "OUT")
+			sensor = messages::OUTLETSENSOR;
+
 		for(int i = 0; i < 6; i++)
-			pp[i] = atoi(argv[i+4]);
+			pp[i] = atoi(argv[i+5]);
 		std::cout << "Parsed command line parameters:\n";
 	} else {
-		std::cout << "Usage: ./client ip port period K Ti Td yref umin umax\n";
+		std::cout << "Usage: ./client ip port sensor period"
+			<< " K Ti Td yref umin umax\n"
+			<< "\tsensor = HEAT|COOL|IN|OUT\n";
 		return 0;	
 	}
 	
@@ -63,7 +75,7 @@ int main(int argc, const char* argv[]) {
         messages::BaseMessage msg;
         messages::Register* reg = msg.mutable_register_();
         reg->set_periodtime(period);
-        reg->add_type(messages::HEATERSENSOR);
+        reg->add_type(sensor);
         
         // Send message 
         output << msg;

@@ -19,7 +19,7 @@ LDFLAGS+= -L$(LIB_PATH) -lcontrol -lprotobuf -lboost_system
 LDFLAGS+= -lboost_thread-mt -lrt
 
 OBJS= batchtank.pb.o main.o
-SUB_DIRS= control connection
+SUB_DIRS= control
 
 all: $(OBJS)
 	for DIR in $(SUB_DIRS); do \
@@ -42,8 +42,8 @@ clean: protoclean
 main.o: main.cc batchtank.pb.h ../common/message_utils.h
 	$(CXX) -c $(CXXFLAGS) main.cc -o main.o $(CPPFLAGS)
 
-batchtank.pb.o: batchtank.pb.cc
-	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o
+#batchtank.pb.o: batchtank.pb.cc
+#	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o
 
 batchtank.pb.h: batchtank.pb.cc
 

@@ -14,11 +14,13 @@ namespace batchtank {
 using namespace batchtank;
 
 
+// args: ip port period K Ti Td yref min max
 int main(int argc, const char* argv[]) {
 
 	// Parse some args
-	std::string u = std::string("127.0.0.1");
-	int p = 54000;
+	std::string ip = std::string("127.0.0.1");
+	int port = 54000;
+	int period = 50;
 	double pp[] = {1,2,1,2,-5,5};	
 
 	if (argc == 0) {
@@ -29,15 +31,16 @@ int main(int argc, const char* argv[]) {
 		std::cout << "File parsing not implemented\n"
 			<< "Using standard url:port\n";
 	}
-	if (argc == 9) {
-		u = std::string(argv[1]);
-		p = atoi(argv[2]);
+	if (argc == 10) {
+		ip = std::string(argv[1]);
+		port = atoi(argv[2]);
+		period = atoi(argv[3]);
 		for(int i = 0; i < 6; i++)
-			pp[i] = atoi(argv[i+3]);
+			pp[i] = atoi(argv[i+4]);
 		std::cout << "Parsed command line parameters:\n";
 	}
 	
-	std::cout << "\t" << u << ":" << p << "\n";
+	std::cout << "\t" << ip << ":" << port << "\t" << period << "\n";
 	for(int i = 0; i < 6; i++)
 		std::cout << "\t" << pp[i];
 	std::cout << "\n";
@@ -47,7 +50,7 @@ int main(int argc, const char* argv[]) {
     try {
         boost::asio::io_service io_service;
         boost::asio::ip::tcp::endpoint endpoint(
-                boost::asio::ip::address::from_string("127.0.0.1"), 54000);
+                boost::asio::ip::address::from_string(ip), port);
 
         tcp::socket socket(io_service);
         socket.connect(endpoint);
@@ -59,7 +62,7 @@ int main(int argc, const char* argv[]) {
         // First register for sensor data
         messages::BaseMessage msg;
         messages::Register* reg = msg.mutable_register_();
-        reg->set_periodtime(50);
+        reg->set_periodtime(period);
         reg->add_type(messages::HEATERSENSOR);
         
         // Send message 

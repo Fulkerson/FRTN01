@@ -63,10 +63,12 @@ int init(const char* path)
 
 	if (tcsetattr(fd, TCSANOW, &config) < 0) 
 		return -1;
+
 	return 1;
 }
 
-int get(enum channel chan)
+	
+int get(enum read_target chan)
 {
 	unsigned char	data;
 	unsigned char 	head[50] = { 0 };
@@ -80,46 +82,55 @@ int get(enum channel chan)
 	data |= GET_VAL;
 
 	if (-1 == write(fd, &data, 1))
-		printf("write failed\n");
-
+		return -1;
 	
 	c = MORE_BIT;
 	buff = head;
+	avail = 0;
 	while (c & MORE_BIT) {	
 		while (!avail)
 			ioctl(fd, FIONREAD, &avail);
-
+	
 		if (-1 == read(fd, buff, avail)) 
 			return -1;
+	
+		printf("values:\n");
+		for (i = 0; i < avail; i+=1)
+			printf("%d\n", buff[i]);
 
 		c = buff[avail - 1];
 		buff = &buff[avail];
+		avail = 0;
 	}
 
 	ioctl(fd, TCFLSH);
 
 	value = 0;
-	for (i = 0; head[i] & MORE_BIT; i+=1) {
+	for (i = 0; head[i] & MORE_BIT; i+=1) 
 		value = (value << 7) | (head[i] & 0x7f);
-
-	}
-
+	
+	printf("valu: %d\n", value);
 	return value;
 } 
-int set(enum set_target target, char value) 
+int set(enum set_target target, int value) 
 {
-	unsigned char 	data[2];	
+	unsigned char 	data[50];	
+	int		i;
 
-	data[0] = MORE_BIT;
-	data[0] |= value; 
-	data[1] = 0;
-	data[1] |= target;
+	i = 0;
+	do {
+		data[i] = MORE_BIT;
+		data[i] |= (value & 0x7f);
+		value = value >> 7;
+		i+=1;
+	} while (value > 0 && i < 50);
 
-	if (-1 == write(fd, data, 2))
-		printf("write failed\n");
+	data[i] = target;
+	i+=1;
 
-	ioctl(fd, TCFLSH);
-	
+	if (-1 == write(fd, data, i))
+		return -1;
+
 	return 1;
 }
 int destroy(void)

@@ -19,13 +19,19 @@ namespace messages {
 /* Monitor class used to interface with the batch process. */
 class IORegistry {
     public:
+        IORegistry();
         /* Used for locking when writing/reading to the batch process. */
         boost::mutex mutex;
         double getSensor(messages::SensorType);
-        void setSensor(messages::SensorType, double value);
+        double getOutput(messages::OutputType);
+        void setOutput(messages::OutputType, double value);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
-       int32_t inletpump;
+        int32_t heater;
+        int32_t cooler;
+        int32_t in_pump;
+        int32_t out_pump;
+        int32_t mixer;
 };
 
 

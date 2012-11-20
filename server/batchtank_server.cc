@@ -37,6 +37,31 @@ add_timespec(timespec t1, timespec t2)
     return t;
 }
 
+IORegistry::IORegistry()
+{
+    /* Set values for signals */
+}
+
+double
+IORegistry::getOutput(messages::OutputType type)
+{
+    switch(type) {
+        case messages::HEATER:
+            return heater;
+        case messages::COOLER:
+            return cooler;
+        case messages::IN_PUMP:
+            return in_pump;
+        case messages::OUT_PUMP:
+            return out_pump;
+        case messages::MIXER:
+            return mixer;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            return 0;
+    } 
+}
+
 double
 IORegistry::getSensor(messages::SensorType type)
 {
@@ -72,24 +97,29 @@ IORegistry::getSensor(messages::SensorType type)
 }
 
 void
-IORegistry::setSensor(messages::SensorType type, double value)
+IORegistry::setOutput(messages::OutputType type, double value)
 {
     std::cout << "SET ";
     switch(type) {
         case messages::HEATER:
             std::cout << "HEATER: ";
+            heater = value;
             break;
         case messages::COOLER:
             std::cout << "COOLER: ";
+            cooler = value;
             break;
         case messages::IN_PUMP:
             std::cout << "IN_PUMP: ";
+            in_pump = value;
             break;
         case messages::OUT_PUMP:
             std::cout << "OUT_PUMP: ";
+            out_pump = value;
             break;
         case messages::MIXER:
             std::cout << "MIXER: ";
+            mixer = value;
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -233,15 +263,39 @@ ConnectionThread::run()
             in >> msg;
 
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
-
-            auto start = msg.signal().begin();
-            auto end = msg.signal().end();
             
+            /* Handle signals */
             {
+                auto start = msg.signal().begin();
+                auto end = msg.signal().end();
                 boost::lock_guard<boost::mutex> lock(ioreg.mutex);
                 std::for_each (start, end, [this](messages::ControlSignal c) {
-                    ioreg.setSensor(c.type(), c.value());
+                    ioreg.setOutput(c.type(), c.value());
                 });
+            }
+
+            /* Handle getSensor */
+            {
+                auto start = msg.getsensor().begin();
+                auto end = msg.getsensor().end();
+                boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+                std::for_each (start, end, [this, &msg](messages::SensorType type) {
+                    messages::Sample* s = msg.add_sample();
+                    s->set_value(ioreg.getSensor(type));
+                    s->set_type((messages::Sensor) type);
+                }); 
+            }
+
+            /* Handle getOutput */
+            {
+                auto start = msg.getoutput().begin();
+                auto end = msg.getoutput().end();
+                boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+                std::for_each (start, end, [this, &msg](messages::OutputType type) {
+                    messages::ControlSignal* s = msg.add_signal();
+                    s->set_value(ioreg.getOutput(type));
+                    s->set_type((messages::Output) type);
+                }); 
             }
 
             /* Handle register for new sensors message */

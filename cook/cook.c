@@ -5,89 +5,123 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <sys/ioctl.h>
+#include <stdint.h>
 
 #include "cook.h"
 
-#define CONFIG_CHAN	(31)
-#define ERROR_bit	(0x80)
+#define MORE_BIT		(0x80)
+#define GET_VAL			(3 << 5)
+#define IN_PUMP_RATE_BIT	(2)
+#define OUT_PUMP_RATE_BIT	(3)
 
-enum command { 
-	cmd_clear_bit, 
-	cmd_set_bit,
-	cmd_read_bit, 
-	cmd_read_chan 
-};
+
 
 static int fd = -1;
-static struct termios  config;
+
+/* 
+	Before using this method, make sure that the the cooker is
+	reseted after the cables are connected. The tank will die otherwise 
+*/
 
 int init(const char* path)
 {
+	struct termios  config = { 0 };
 
 	fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
+
+	/* Solved some errors */	
+	ioctl(fd, TCFLSH);
 
 	if (-1 == fd) 
 		return -1;
 
 	if (!isatty(fd)) 
 		return -1;
-
-    	tcgetattr(fd, &config);
+	
+	if (tcsetattr(fd, TCSANOW, &config) < 0) 
+		return -1;
 
 	/* NO parity */
 	config.c_cflag &= ~PARENB;
 	config.c_cflag &= ~CSTOPB;
 	config.c_cflag &= ~CSIZE;
 	config.c_cflag |= CS8;
-
+	/* Since PARENB is not set, then unset INPCK and ISTRIP */
+	config.c_iflag &= ~(INPCK | ISTRIP);
 
 	if (cfsetispeed(&config, B115200) < 0 || cfsetospeed(&config, B115200) < 0) 
 		return -1;
 
 	config.c_cflag |= (CLOCAL | CREAD);
 
+	/* Raw input */
+	config.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 	config.c_oflag &= ~OPOST;
 
-	if (tcsetattr(fd, TCSAFLUSH, &config) < 0) 
-		return -1;
+	/* Software flow control */
+	config.c_iflag &= ~(IXON | IXOFF | IXANY);
 
+	if (tcsetattr(fd, TCSANOW, &config) < 0) 
+		return -1;
 	return 1;
 }
 
 int get(enum channel chan)
 {
 	unsigned char	data;
-	unsigned char 	ret[50] = { 0 };
-	int		avail = 0;
+	unsigned char 	head[50] = { 0 };
+	unsigned char*	buff;
+	int		avail;
+	int		value;
+	unsigned char	c;
+	int		i;
 	
-	data = 0;
-	data |= 31;
-	data |= 3 << 5;
+	data = chan;
+	data |= GET_VAL;
 
 	if (-1 == write(fd, &data, 1))
 		printf("write failed\n");
 
 	
-	while (!avail) {	
-		ioctl(fd, FIONREAD, &avail);
+	c = MORE_BIT;
+	buff = head;
+	while (c & MORE_BIT) {	
+		while (!avail)
+			ioctl(fd, FIONREAD, &avail);
+
+		if (-1 == read(fd, buff, avail)) 
+			return -1;
+
+		c = buff[avail - 1];
+		buff = &buff[avail];
 	}
 
+	ioctl(fd, TCFLSH);
 
-	if (-1 == read(fd, ret, 50))
-		perror(""); 
+	value = 0;
+	for (i = 0; head[i] & MORE_BIT; i+=1) {
+		value = (value << 7) | (head[i] & 0x7f);
 
-	for (int i = 0; i < 50; i+=1)
-		printf("%d\n", ret[i]);
+	}
 
-	return ret[0];
-}
-
-int set(enum channel chan, int value)
+	return value;
+} 
+int set(enum set_target target, char value) 
 {
+	unsigned char 	data[2];	
 
-	return 0;
+	data[0] = MORE_BIT;
+	data[0] |= value; 
+	data[1] = 0;
+	data[1] |= target;
+
+	if (-1 == write(fd, data, 2))
+		printf("write failed\n");
+
+	ioctl(fd, TCFLSH);
+	
+	return 1;
 }
-
 int destroy(void)
 {
 	return close(fd);

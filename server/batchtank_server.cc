@@ -37,23 +37,31 @@ add_timespec(timespec t1, timespec t2)
     return t;
 }
 
-
 double
 IORegistry::getSensor(messages::SensorType type)
 {
     std::cout << "GET ";
     switch(type) {
-        case messages::HEATERSENSOR:
-            std::cout << "HEATERSENSOR: ";
+        case messages::TEMP:
+            std::cout << "TEMP: ";
             break;
-        case messages::COOLERSENSOR:
-            std::cout << "COOLERSENSOR: ";
+        case messages::LEVEL:
+            std::cout << "LEVEL: ";
             break;
-        case messages::INLETSENSOR:
-            std::cout << "INLETSENSOR: ";
+        case messages::IN_PUMP_RATE:
+            std::cout << "IN_PUMP_RATE: ";
             break;
-        case messages::OUTLETSENSOR:
-            std::cout << "OUTLETSENSOR: ";
+        case messages::OUT_PUMP_RATE:
+            std::cout << "OUT_PUMP_RATE: ";
+            break;
+        case messages::HEATER_RATE:
+            std::cout << "HEATER_RATE: ";
+            break;
+        case messages::MIXER_RATE:
+            std::cout << "MIXER_RATE: ";
+            break;
+        case messages::COOLER_RATE:
+            std::cout << "COOLER_RATE: ";
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -74,11 +82,14 @@ IORegistry::setSensor(messages::SensorType type, double value)
         case messages::COOLER:
             std::cout << "COOLER: ";
             break;
-        case messages::INLETPUMP:
-            std::cout << "INLETPUMP: ";
+        case messages::IN_PUMP:
+            std::cout << "IN_PUMP: ";
             break;
-        case messages::OUTLETPUMP:
-            std::cout << "OUTLETPUMP: ";
+        case messages::OUT_PUMP:
+            std::cout << "OUT_PUMP: ";
+            break;
+        case messages::MIXER:
+            std::cout << "MIXER: ";
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -86,8 +97,6 @@ IORegistry::setSensor(messages::SensorType type, double value)
     }
     std::cout << value << std::endl;
 }
-
-
 
 Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
         tcp::socket& sock):

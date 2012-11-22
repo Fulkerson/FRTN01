@@ -42,7 +42,7 @@ IORegistry::IORegistry()
     /* Set values for signals */
 }
 
-double
+int32_t
 IORegistry::getOutput(messages::OutputType type)
 {
     switch(type) {
@@ -62,7 +62,27 @@ IORegistry::getOutput(messages::OutputType type)
     } 
 }
 
-double
+int32_t
+IORegistry::getReference(messages::OutputType type)
+{
+    switch(type) {
+        case messages::HEATER:
+            return heater_ref;
+        case messages::COOLER:
+            return cooler_ref;
+        case messages::IN_PUMP:
+            return in_pump_ref;
+        case messages::OUT_PUMP:
+            return out_pump_ref;
+        case messages::MIXER:
+            return mixer_ref;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            return 0;
+    } 
+}
+
+int32_t
 IORegistry::getSensor(messages::SensorType type)
 {
     std::cout << "GET ";
@@ -97,7 +117,7 @@ IORegistry::getSensor(messages::SensorType type)
 }
 
 void
-IORegistry::setOutput(messages::OutputType type, double value, double ref)
+IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
 {
     std::cout << "SET ";
     switch(type) {
@@ -256,13 +276,16 @@ ConnectionThread::run()
 
     try {
         MessageInput<messages::BaseMessage, tcp::socket> in(*m_Socket);
+        MessageOutput<messages::BaseMessage, tcp::socket> out(*m_Socket);
        
         std::unique_ptr<PeriodicTask> sampler;
 
         messages::BaseMessage msg;
+        messages::BaseMessage send;
 
         while (true) {
             msg.Clear();
+            send.Clear();
 
             /* Parse message */
             in >> msg;
@@ -284,8 +307,8 @@ ConnectionThread::run()
                 auto start = msg.getsensor().begin();
                 auto end = msg.getsensor().end();
                 boost::lock_guard<boost::mutex> lock(ioreg.mutex);
-                std::for_each (start, end, [this, &msg](messages::SensorType type) {
-                    messages::Sample* s = msg.add_sample();
+                std::for_each (start, end, [this, &send](messages::SensorType type) {
+                    messages::Sample* s = send.add_sample();
                     s->set_value(ioreg.getSensor(type));
                     s->set_type((messages::Sensor) type);
                 }); 
@@ -296,9 +319,10 @@ ConnectionThread::run()
                 auto start = msg.getoutput().begin();
                 auto end = msg.getoutput().end();
                 boost::lock_guard<boost::mutex> lock(ioreg.mutex);
-                std::for_each (start, end, [this, &msg](messages::OutputType type) {
-                    messages::ControlSignal* s = msg.add_signal();
+                std::for_each (start, end, [this, &send](messages::OutputType type) {
+                    messages::ControlSignal* s = send.add_signal();
                     s->set_value(ioreg.getOutput(type));
+                    s->set_ref(ioreg.getReference(type));
                     s->set_type((messages::Output) type);
                 }); 
             }
@@ -316,6 +340,11 @@ ConnectionThread::run()
                 sampler.reset(new PeriodicTask(r.periodtime(),
                             Sampler(sensors, ioreg, *m_Socket)));
                 sampler->start();
+            }
+
+            /* Send if enything to send */
+            if (send.ByteSize()) {
+                out << send;
             }
 
             /* Shut down gracefully */

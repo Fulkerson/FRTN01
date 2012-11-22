@@ -68,13 +68,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Cache-Control', 'no-cache, must-revalidate')
                 self.send_header('Content-type', 'application/json;charset=utf-8')
                 self.end_headers()
-                query = parse_qs(urlparse(self.path)[4])
-                out = json.dumps({
-                    'ref': [[1, 1]],
-                    'out': [[2, 2]],
-                    'in': [[3, 3]]
-                    })
-                print  self.getData()
+
+                out = json.dumps(self.getData())
+
+                print out
+
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):
                 # Serve index!

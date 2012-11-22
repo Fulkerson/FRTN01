@@ -154,8 +154,8 @@ IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
 }
 
 Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
-        tcp::socket& sock):
-    sensors(sensors), ioreg(ioreg), m_Socket(sock) {}
+        tcp::socket& sock, boost::mutex& write_mutex):
+    sensors(sensors), ioreg(ioreg), m_Socket(sock), write_mutex(write_mutex) {}
 
 
 void 
@@ -179,7 +179,10 @@ Sampler::operator()()
         });
     }
 
-    out << msg;
+    {
+        boost::lock_guard<boost::mutex> lock(write_mutex);
+        out << msg;
+    }
 }
 
 
@@ -277,6 +280,7 @@ ConnectionThread::run()
     try {
         MessageInput<messages::BaseMessage, tcp::socket> in(*m_Socket);
         MessageOutput<messages::BaseMessage, tcp::socket> out(*m_Socket);
+        boost::mutex write_mutex;
        
         std::unique_ptr<PeriodicTask> sampler;
 
@@ -338,12 +342,13 @@ ConnectionThread::run()
 
                 /* Replace periodic timer */
                 sampler.reset(new PeriodicTask(r.periodtime(),
-                            Sampler(sensors, ioreg, *m_Socket)));
+                            Sampler(sensors, ioreg, *m_Socket, write_mutex)));
                 sampler->start();
             }
 
             /* Send if enything to send */
             if (send.ByteSize()) {
+                boost::lock_guard<boost::mutex> lock(write_mutex);
                 out << send;
             }
 

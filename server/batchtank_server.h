@@ -73,13 +73,15 @@ class PeriodicTask {
 class Sampler {
     public:
         Sampler(std::vector<messages::SensorType>&, IORegistry&,
-                boost::asio::ip::tcp::socket&);
+                boost::asio::ip::tcp::socket&,
+                boost::mutex&);
         void operator()();
     private:
         messages::BaseMessage msg;
         std::vector<messages::SensorType> sensors;
         IORegistry& ioreg;
         boost::asio::ip::tcp::socket& m_Socket;
+        boost::mutex& write_mutex;
 };
 
 }

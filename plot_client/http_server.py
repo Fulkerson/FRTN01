@@ -5,11 +5,31 @@ from urlparse import urlparse, parse_qs
 import json
 import re
 import os
+import socket
+import batchtank
 
 DIR = 'batchtank/static'
 
 class RequestHandler(BaseHTTPRequestHandler):
-    _rand = SystemRandom()
+    def __init__(self):
+        self._rand = SystemRandom()
+        self.procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.procsoc.connect(("localhost", 54000))
+
+        BaseHttpRequestHandler.__init__(self)
+
+    def getData():
+        bm = batchtank.BaseMessage()
+        bm.getSensor.append(batchtank.COOLER_RATE)
+        bm.getSignal.append(batchtank.COOLER)
+
+        bm.SerializeToSocket(self.procsoc)
+
+        bm = batchtank.BaseMessage()
+        bm.ParseFromSocket(self.procsoc)
+
+
+
     def do_GET(self):
         try:
             if (self.path == '/jquery.js' or self.path == '/jquery.flot.js'):
@@ -29,10 +49,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 query = parse_qs(urlparse(self.path)[4])
                 print query
                 out = json.dumps({
-                    'ref': [[12, 37]],
-                    'out': [[5, 12]],
-                    'in': [[2, 25]]
+                    'ref': [[1, 1]],
+                    'out': [[2, 2]],
+                    'in': [[3, 3]]
                     })
+                print out
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):
                 # Serve index!

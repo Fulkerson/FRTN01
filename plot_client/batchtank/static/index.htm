@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>plot</title>
+		<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+		<script language="javascript" type="text/javascript" src="jquery.js"></script>
+		<script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
+	</head>
+	<body>
+		<div id="placeholder" style="width:800px;height:400px;margin-left:auto;margin-right:auto;"></div>
+	<script type="text/javascript">
+		$(function() {
+			var plot = null;
+			var data = [];
+			var options = {
+				series: { shadowSize: 0 }, // drawing is faster without shadows
+			        yaxis: { min: 0, max: 100 },
+			        xaxis: { show: false }
+			};
+
+			updateData();
+
+			function updateData() {
+				// URL to data source:
+				var turl = 'data';
+				for (var i = 0; i < data.length; i += 1) {
+					if (i == 0) {
+						turl += '?';
+					} else {
+						turl += '&';
+					}
+					turl += data[i]['label'] + '=' + data[i]['data'][data[i]['data'].length - 1][0];
+				}
+				$.ajax({
+					url: turl,
+					success: function(new_data) {
+						for (var key in new_data) {
+							if (data.length == 0) {
+								data.push({label: key, data: new_data[key]});
+							} else {
+								var i;
+								for (i = 0; i < data.length; i += 1) {
+									if (data[i]['label'] == key) {
+										// Start to remove old points if amount of
+										// point is more then this (per curve).
+										if (data[i]['data'].length > 20) {
+											data[i]['data'].shift();
+										}
+										data[i]['data'] = data[i]['data'].concat(new_data[key]);
+										break;
+									}
+								}
+
+								if (i == data.length) {
+									// New curve. Add to plot.
+									data.push({label: key, data: new_data[key]});
+								}
+							}
+						}
+
+						if (plot == null) {
+							plot = $.plot($("#placeholder"), data, options);
+						} else {
+							plot.setData(data);
+							plot.setupGrid();
+							plot.draw();
+						}
+					},
+					complete: function() {
+						setTimeout(updateData, 100);
+					}
+				});
+			}
+		});
+
+	</script>
+	</body>
+</html>

@@ -11,12 +11,14 @@ import batchtank
 DIR = 'batchtank/static'
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def __init__(self):
+    def __init__(self, *args):
         self._rand = SystemRandom()
         self.procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.procsoc.connect(("localhost", 54000))
 
-        BaseHttpRequestHandler.__init__(self)
+        # TODO: Connect with server running.
+        #self.procsoc.connect(("localhost", 54000))
+
+        BaseHTTPRequestHandler.__init__(self, *args)
 
     def getData():
         bm = batchtank.BaseMessage()

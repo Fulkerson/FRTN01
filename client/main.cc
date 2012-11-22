@@ -124,6 +124,7 @@ int main(int argc, const char* argv[]) {
             messages::ControlSignal* sig = msg.add_signal();
             sig->set_type(messages::HEATER);
             sig->set_value(value);
+            sig->set_ref(0);
             output << msg;
         }
     } catch (std::exception& e)  {

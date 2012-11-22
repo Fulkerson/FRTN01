@@ -24,14 +24,19 @@ class IORegistry {
         boost::mutex mutex;
         double getSensor(messages::SensorType);
         double getOutput(messages::OutputType);
-        void setOutput(messages::OutputType, double value);
+        void setOutput(messages::OutputType, double value, double ref);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
         int32_t heater;
+        int32_t heater_ref;
         int32_t cooler;
+        int32_t cooler_ref;
         int32_t in_pump;
+        int32_t in_pump_ref;
         int32_t out_pump;
+        int32_t out_pump_ref;
         int32_t mixer;
+        int32_t mixer_ref;
 };
 
 

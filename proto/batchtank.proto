@@ -38,7 +38,8 @@ message Register {
 
 message ControlSignal {
     required double value = 1;
-    required Output type = 2;
+    required double ref = 2;
+    required Output type = 3;
 }
 
 message Sample {

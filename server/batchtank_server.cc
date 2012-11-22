@@ -97,29 +97,34 @@ IORegistry::getSensor(messages::SensorType type)
 }
 
 void
-IORegistry::setOutput(messages::OutputType type, double value)
+IORegistry::setOutput(messages::OutputType type, double value, double ref)
 {
     std::cout << "SET ";
     switch(type) {
         case messages::HEATER:
             std::cout << "HEATER: ";
             heater = value;
+            heater_ref = ref;
             break;
         case messages::COOLER:
             std::cout << "COOLER: ";
             cooler = value;
+            cooler_ref = ref;
             break;
         case messages::IN_PUMP:
             std::cout << "IN_PUMP: ";
             in_pump = value;
+            in_pump_ref = ref;
             break;
         case messages::OUT_PUMP:
             std::cout << "OUT_PUMP: ";
             out_pump = value;
+            out_pump_ref = ref;
             break;
         case messages::MIXER:
             std::cout << "MIXER: ";
             mixer = value;
+            mixer_ref = ref;
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -270,7 +275,7 @@ ConnectionThread::run()
                 auto end = msg.signal().end();
                 boost::lock_guard<boost::mutex> lock(ioreg.mutex);
                 std::for_each (start, end, [this](messages::ControlSignal c) {
-                    ioreg.setOutput(c.type(), c.value());
+                    ioreg.setOutput(c.type(), c.value(), c.ref());
                 });
             }
 

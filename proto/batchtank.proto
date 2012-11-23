@@ -37,13 +37,13 @@ message Register {
 }
 
 message ControlSignal {
-    required double value = 1;
-    required double ref = 2;
+    required int32 value = 1;
+    required int32 ref = 2;
     required Output type = 3;
 }
 
 message Sample {
-    required double value = 1;
+    required int32 value = 1;
     required Sensor type = 2;
 }
 

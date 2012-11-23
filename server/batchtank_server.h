@@ -22,9 +22,10 @@ class IORegistry {
         IORegistry();
         /* Used for locking when writing/reading to the batch process. */
         boost::mutex mutex;
-        double getSensor(messages::SensorType);
-        double getOutput(messages::OutputType);
-        void setOutput(messages::OutputType, double value, double ref);
+        int32_t getSensor(messages::SensorType);
+        int32_t getOutput(messages::OutputType);
+        int32_t getReference(messages::OutputType);
+        void setOutput(messages::OutputType, int32_t value, int32_t ref);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
         int32_t heater;
@@ -72,13 +73,15 @@ class PeriodicTask {
 class Sampler {
     public:
         Sampler(std::vector<messages::SensorType>&, IORegistry&,
-                boost::asio::ip::tcp::socket&);
+                boost::asio::ip::tcp::socket&,
+                boost::mutex&);
         void operator()();
     private:
         messages::BaseMessage msg;
         std::vector<messages::SensorType> sensors;
         IORegistry& ioreg;
         boost::asio::ip::tcp::socket& m_Socket;
+        boost::mutex& write_mutex;
 };
 
 }

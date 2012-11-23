@@ -16,20 +16,40 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # TODO: Connect with server running.
-        #self.procsoc.connect(("localhost", 54000))
+        self.procsoc.connect(("localhost", 54000))
 
         BaseHTTPRequestHandler.__init__(self, *args)
 
-    def getData():
+    def getData(self):
         bm = batchtank.BaseMessage()
-        bm.getSensor.append(batchtank.COOLER_RATE)
-        bm.getSignal.append(batchtank.COOLER)
+        bm.getSensor.append(batchtank.TEMP)
+        bm.getOutput.append(batchtank.COOLER)
+        bm.getSensor.append(batchtank.LEVEL)
+        bm.getOutput.append(batchtank.IN_PUMP_RATE)
 
         bm.SerializeToSocket(self.procsoc)
 
         bm = batchtank.BaseMessage()
         bm.ParseFromSocket(self.procsoc)
 
+        data = {"Temperature" : {},
+                "Water Level" : {}}
+
+        for s in bm.sample:
+            if s.type == batchtank.TEMP:
+                data["Temperature"]["temp"] = s.value
+            elif s.type == batchtank.LEVEL:
+                data["Water Level"]["level"] = s.value
+
+        for s in bm.signal:
+            if s.type == batchtank.COOLER:
+                data["Temperature"]["u"] = s.value
+                data["Temperature"]["ref"] = s.ref
+            elif s.type == batchtank.IN_PUMP_RATE:
+                data["Water Level"]["u"] = s.value
+                data["Water Level"]["ref"] = s.ref
+
+        return data
 
 
     def do_GET(self):
@@ -48,14 +68,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Cache-Control', 'no-cache, must-revalidate')
                 self.send_header('Content-type', 'application/json;charset=utf-8')
                 self.end_headers()
-                query = parse_qs(urlparse(self.path)[4])
-                print query
-                out = json.dumps({
-                    'ref': [[1, 1]],
-                    'out': [[2, 2]],
-                    'in': [[3, 3]]
-                    })
+
+                out = json.dumps(self.getData())
+
                 print out
+
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):
                 # Serve index!

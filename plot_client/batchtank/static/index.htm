@@ -23,7 +23,7 @@
 
 			function updateData() {
 				// URL to data source:
-				var turl = 'data.php';
+				var turl = 'data';
 				for (var i = 0; i < data.length; i += 1) {
 					if (i == 0) {
 						turl += '?';
@@ -37,35 +37,16 @@
 					success: function(new_data) {
 						for (var key in new_data) {
 							if (data.length == 0) {
-								for (var i = 0; i < 300; i += 1) {
-									if (new_data[key].length >= 299 - i) {
-										new_data[key][i][0] = i;
-									} else {
-										new_data[key].unshift([i, 0]);
-									}
-								}
 								data.push({label: key, data: new_data[key]});
-								/*
-								if (new_data[key].length < 300) {
-									for (var i = 0; i < new_data[key].length; i += 1) {
-										new_data[key].unshift([i, 0]);
-									}
-								} else {
-									data.push({label: key, data: new_data[key]});
-								}
-								*/
 							} else {
 								var i;
 								for (i = 0; i < data.length; i += 1) {
 									if (data[i]['label'] == key) {
 										// Start to remove old points if amount of
 										// point is more then this (per curve).
-										//if (data[i]['data'].length > 20) {
-										for (var j = 0; j < new_data[key].length; j += 1) {
-											new_data[key][i][0] = i;
-											
-										data[i]['data'].shift();
-										//}
+										if (data[i]['data'].length > 20) {
+											data[i]['data'].shift();
+										}
 										data[i]['data'] = data[i]['data'].concat(new_data[key]);
 										break;
 									}

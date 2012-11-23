@@ -37,23 +37,76 @@ add_timespec(timespec t1, timespec t2)
     return t;
 }
 
+IORegistry::IORegistry()
+{
+    /* Set values for signals */
+}
 
-double
+int32_t
+IORegistry::getOutput(messages::OutputType type)
+{
+    switch(type) {
+        case messages::HEATER:
+            return heater;
+        case messages::COOLER:
+            return cooler;
+        case messages::IN_PUMP:
+            return in_pump;
+        case messages::OUT_PUMP:
+            return out_pump;
+        case messages::MIXER:
+            return mixer;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            return 0;
+    } 
+}
+
+int32_t
+IORegistry::getReference(messages::OutputType type)
+{
+    switch(type) {
+        case messages::HEATER:
+            return heater_ref;
+        case messages::COOLER:
+            return cooler_ref;
+        case messages::IN_PUMP:
+            return in_pump_ref;
+        case messages::OUT_PUMP:
+            return out_pump_ref;
+        case messages::MIXER:
+            return mixer_ref;
+        default:
+            std::cerr << "Got something unexpected." << std::endl;
+            return 0;
+    } 
+}
+
+int32_t
 IORegistry::getSensor(messages::SensorType type)
 {
     std::cout << "GET ";
     switch(type) {
-        case messages::HEATERSENSOR:
-            std::cout << "HEATERSENSOR: ";
+        case messages::TEMP:
+            std::cout << "TEMP: ";
             break;
-        case messages::COOLERSENSOR:
-            std::cout << "COOLERSENSOR: ";
+        case messages::LEVEL:
+            std::cout << "LEVEL: ";
             break;
-        case messages::INLETSENSOR:
-            std::cout << "INLETSENSOR: ";
+        case messages::IN_PUMP_RATE:
+            std::cout << "IN_PUMP_RATE: ";
             break;
-        case messages::OUTLETSENSOR:
-            std::cout << "OUTLETSENSOR: ";
+        case messages::OUT_PUMP_RATE:
+            std::cout << "OUT_PUMP_RATE: ";
+            break;
+        case messages::HEATER_RATE:
+            std::cout << "HEATER_RATE: ";
+            break;
+        case messages::MIXER_RATE:
+            std::cout << "MIXER_RATE: ";
+            break;
+        case messages::COOLER_RATE:
+            std::cout << "COOLER_RATE: ";
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -64,21 +117,34 @@ IORegistry::getSensor(messages::SensorType type)
 }
 
 void
-IORegistry::setSensor(messages::SensorType type, double value)
+IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
 {
     std::cout << "SET ";
     switch(type) {
         case messages::HEATER:
             std::cout << "HEATER: ";
+            heater = value;
+            heater_ref = ref;
             break;
         case messages::COOLER:
             std::cout << "COOLER: ";
+            cooler = value;
+            cooler_ref = ref;
             break;
-        case messages::INLETPUMP:
-            std::cout << "INLETPUMP: ";
+        case messages::IN_PUMP:
+            std::cout << "IN_PUMP: ";
+            in_pump = value;
+            in_pump_ref = ref;
             break;
-        case messages::OUTLETPUMP:
-            std::cout << "OUTLETPUMP: ";
+        case messages::OUT_PUMP:
+            std::cout << "OUT_PUMP: ";
+            out_pump = value;
+            out_pump_ref = ref;
+            break;
+        case messages::MIXER:
+            std::cout << "MIXER: ";
+            mixer = value;
+            mixer_ref = ref;
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
@@ -87,11 +153,9 @@ IORegistry::setSensor(messages::SensorType type, double value)
     std::cout << value << std::endl;
 }
 
-
-
 Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
-        tcp::socket& sock):
-    sensors(sensors), ioreg(ioreg), m_Socket(sock) {}
+        tcp::socket& sock, boost::mutex& write_mutex):
+    sensors(sensors), ioreg(ioreg), m_Socket(sock), write_mutex(write_mutex) {}
 
 
 void 
@@ -115,7 +179,10 @@ Sampler::operator()()
         });
     }
 
-    out << msg;
+    {
+        boost::lock_guard<boost::mutex> lock(write_mutex);
+        out << msg;
+    }
 }
 
 
@@ -212,27 +279,56 @@ ConnectionThread::run()
 
     try {
         MessageInput<messages::BaseMessage, tcp::socket> in(*m_Socket);
+        MessageOutput<messages::BaseMessage, tcp::socket> out(*m_Socket);
+        boost::mutex write_mutex;
        
         std::unique_ptr<PeriodicTask> sampler;
 
         messages::BaseMessage msg;
+        messages::BaseMessage send;
 
         while (true) {
             msg.Clear();
+            send.Clear();
 
             /* Parse message */
             in >> msg;
 
             D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
-
-            auto start = msg.signal().begin();
-            auto end = msg.signal().end();
             
+            /* Handle signals */
             {
+                auto start = msg.signal().begin();
+                auto end = msg.signal().end();
                 boost::lock_guard<boost::mutex> lock(ioreg.mutex);
                 std::for_each (start, end, [this](messages::ControlSignal c) {
-                    ioreg.setSensor(c.type(), c.value());
+                    ioreg.setOutput(c.type(), c.value(), c.ref());
                 });
+            }
+
+            /* Handle getSensor */
+            {
+                auto start = msg.getsensor().begin();
+                auto end = msg.getsensor().end();
+                boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+                std::for_each (start, end, [this, &send](messages::SensorType type) {
+                    messages::Sample* s = send.add_sample();
+                    s->set_value(ioreg.getSensor(type));
+                    s->set_type((messages::Sensor) type);
+                }); 
+            }
+
+            /* Handle getOutput */
+            {
+                auto start = msg.getoutput().begin();
+                auto end = msg.getoutput().end();
+                boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+                std::for_each (start, end, [this, &send](messages::OutputType type) {
+                    messages::ControlSignal* s = send.add_signal();
+                    s->set_value(ioreg.getOutput(type));
+                    s->set_ref(ioreg.getReference(type));
+                    s->set_type((messages::Output) type);
+                }); 
             }
 
             /* Handle register for new sensors message */
@@ -246,8 +342,14 @@ ConnectionThread::run()
 
                 /* Replace periodic timer */
                 sampler.reset(new PeriodicTask(r.periodtime(),
-                            Sampler(sensors, ioreg, *m_Socket)));
+                            Sampler(sensors, ioreg, *m_Socket, write_mutex)));
                 sampler->start();
+            }
+
+            /* Send if enything to send */
+            if (send.ByteSize()) {
+                boost::lock_guard<boost::mutex> lock(write_mutex);
+                out << send;
             }
 
             /* Shut down gracefully */

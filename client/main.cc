@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
 	std::string ip("127.0.0.1");
 	int port = 54000;
 	int period = 50;
-	messages::Sensor sensor = messages::HEATERSENSOR;
+	messages::Sensor sensor = messages::HEATER_RATE;
 	
 	double pp[] = {1,2,1,2,-5,5};	
 
@@ -34,13 +34,19 @@ int main(int argc, const char* argv[]) {
 		period = atoi(argv[4]);
 
 		if (sens == "HEAT")
-			sensor = messages::HEATERSENSOR;
+			sensor = messages::HEATER_RATE;
 		else if (sens == "COOL")
-			sensor = messages::COOLERSENSOR;
+			sensor = messages::COOLER_RATE;
 		else if (sens == "IN")
-			sensor = messages::INLETSENSOR;
+			sensor = messages::IN_PUMP_RATE;
 		else if (sens == "OUT")
-			sensor = messages::OUTLETSENSOR;
+			sensor = messages::OUT_PUMP_RATE;
+		else if (sens == "MIXER")
+			sensor = messages::MIXER_RATE;
+		else if (sens == "TEMP")
+			sensor = messages::TEMP;
+		else if (sens == "LEVEL")
+			sensor = messages::LEVEL;
 
 		for(int i = 0; i < 6; i++)
 			pp[i] = atoi(argv[i+5]);
@@ -48,8 +54,8 @@ int main(int argc, const char* argv[]) {
 	} else {
 		std::cout << "Usage: ./client ip port sensor period"
 			<< " K Ti Td yref umin umax\n"
-			<< "\tsensor = HEAT|COOL|IN|OUT\n";
-		return 0;	
+			<< "\tsensor = HEAT|COOL|IN|OUT|MIXER|TEMP|LEVEL\n";
+		return 0;
 	}
 	
 	std::cout << "\t" << ip << ":" << port << "\t" << period << "\n";
@@ -99,7 +105,7 @@ int main(int argc, const char* argv[]) {
 
             // Get sample 
             messages::Sample s = msg.sample(0);
-            if (s.type() != messages::HEATERSENSOR) {
+            if (s.type() != messages::HEATER_RATE) {
                 std::cerr << "Didn't receive proper message" << std::endl;
                 break;
             } else {
@@ -118,6 +124,7 @@ int main(int argc, const char* argv[]) {
             messages::ControlSignal* sig = msg.add_signal();
             sig->set_type(messages::HEATER);
             sig->set_value(value);
+            sig->set_ref(0);
             output << msg;
         }
     } catch (std::exception& e)  {

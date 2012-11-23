@@ -3,25 +3,30 @@ package batchtank_messages;
 //option optimize_for = LITE_RUNTIME;
 
 enum Sensor {
-    HEATERSENSOR = 0;
-    COOLERSENSOR = 1;
-    INLETSENSOR = 2;
-    OUTLETSENSOR = 3;
+    TEMP = 1;
+    LEVEL = 2;
+    IN_PUMP_RATE = 3;
+    OUT_PUMP_RATE = 4;
+    HEATER_RATE = 5;
+    MIXER_RATE = 6;
+    COOLER_RATE = 7;
 }
 
 enum Output {
-    HEATER = 0;
-    COOLER = 1;
-    INLETPUMP = 2;
-    OUTLETPUMP = 3;
+    HEATER = 1;
+    COOLER = 2;
+    IN_PUMP = 3;
+    OUT_PUMP = 4;
+    MIXER = 5;
 }
 
 message BaseMessage {
     repeated Sample sample = 1;
     repeated ControlSignal signal = 2;
     optional Register register = 3;
-    optional Sensor getSensor = 4;
-    optional bool endConnection = 5;
+    repeated Sensor getSensor = 4;
+    repeated Output getOutput = 5;
+    optional bool endConnection = 6;
 }
 
 // Used for registering for a period time etc. 
@@ -32,12 +37,13 @@ message Register {
 }
 
 message ControlSignal {
-    required double value = 1;
-    required Output type = 2;
+    required int32 value = 1;
+    required int32 ref = 2;
+    required Output type = 3;
 }
 
 message Sample {
-    required double value = 1;
+    required int32 value = 1;
     required Sensor type = 2;
 }
 

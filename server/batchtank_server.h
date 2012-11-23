@@ -19,13 +19,25 @@ namespace messages {
 /* Monitor class used to interface with the batch process. */
 class IORegistry {
     public:
+        IORegistry();
         /* Used for locking when writing/reading to the batch process. */
         boost::mutex mutex;
-        double getSensor(messages::SensorType);
-        void setSensor(messages::SensorType, double value);
+        int32_t getSensor(messages::SensorType);
+        int32_t getOutput(messages::OutputType);
+        int32_t getReference(messages::OutputType);
+        void setOutput(messages::OutputType, int32_t value, int32_t ref);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
-       int32_t inletpump;
+        int32_t heater;
+        int32_t heater_ref;
+        int32_t cooler;
+        int32_t cooler_ref;
+        int32_t in_pump;
+        int32_t in_pump_ref;
+        int32_t out_pump;
+        int32_t out_pump_ref;
+        int32_t mixer;
+        int32_t mixer_ref;
 };
 
 
@@ -61,13 +73,15 @@ class PeriodicTask {
 class Sampler {
     public:
         Sampler(std::vector<messages::SensorType>&, IORegistry&,
-                boost::asio::ip::tcp::socket&);
+                boost::asio::ip::tcp::socket&,
+                boost::mutex&);
         void operator()();
     private:
         messages::BaseMessage msg;
         std::vector<messages::SensorType> sensors;
         IORegistry& ioreg;
         boost::asio::ip::tcp::socket& m_Socket;
+        boost::mutex& write_mutex;
 };
 
 }

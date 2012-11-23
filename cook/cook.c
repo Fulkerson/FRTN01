@@ -11,10 +11,6 @@
 
 #define MORE_BIT		(0x80)
 #define GET_VAL			(3 << 5)
-#define IN_PUMP_RATE_BIT	(2)
-#define OUT_PUMP_RATE_BIT	(3)
-
-
 
 static int fd = -1;
 
@@ -94,10 +90,6 @@ int get(enum read_target chan)
 		if (-1 == read(fd, buff, avail)) 
 			return -1;
 	
-		printf("values:\n");
-		for (i = 0; i < avail; i+=1)
-			printf("%d\n", buff[i]);
-
 		c = buff[avail - 1];
 		buff = &buff[avail];
 		avail = 0;
@@ -109,7 +101,8 @@ int get(enum read_target chan)
 	for (i = 0; head[i] & MORE_BIT; i+=1) 
 		value = (value << 7) | (head[i] & 0x7f);
 	
-	printf("valu: %d\n", value);
+	printf("channel: %d\n", head[i]);
+	printf("value: %d\n", value);
 	return value;
 } 
 int set(enum set_target target, int value) 
@@ -137,5 +130,3 @@ int destroy(void)
 {
 	return close(fd);
 }
-
-

@@ -43,6 +43,12 @@ int main(void)
 				else 
 					target = IN_PUMP_RATE;
 				break;
+			case 'o':
+				if (se)
+					target = OUT_PUMP;
+				else
+					target = OUT_PUMP_RATE;
+				break;
 			case 'm':
 				if (se) 
 					target = MIXER;
@@ -78,7 +84,7 @@ int main(void)
 				}
 				break;
 			case '\n':
-				if (se && target != -1 && val < 20) 
+				if (se && target != -1) 
 					set(target, val);
 				else if (target != -1) {
 					printf("%d\n", get(target));

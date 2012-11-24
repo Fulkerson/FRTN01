@@ -7,14 +7,14 @@
 		<script language="javascript" type="text/javascript" src="jquery.js"></script>
 		<script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
 	</head>
-	<body>
-		<div id="placeholder" style="width:800px;height:400px;margin-left:auto;margin-right:auto;"></div>
+	<body id="body">
 	<script type="text/javascript">
 		$(function() {
-			var plot = null;
+			var points = 100;
 			var data = [];
+			var plots = [];
 			var options = {
-				series: { shadowSize: 0 }, // drawing is faster without shadows
+				series: { shadowSize: 0 }, // Drawing is faster without shadows.
 			        yaxis: { min: 0, max: 100 },
 			        xaxis: { show: false }
 			};
@@ -22,53 +22,52 @@
 			updateData();
 
 			function updateData() {
-				// URL to data source:
-				var turl = 'data';
-				for (var i = 0; i < data.length; i += 1) {
-					if (i == 0) {
-						turl += '?';
-					} else {
-						turl += '&';
-					}
-					turl += data[i]['label'] + '=' + data[i]['data'][data[i]['data'].length - 1][0];
-				}
 				$.ajax({
-					url: turl,
+					url: 'data.php',
 					success: function(new_data) {
-						for (var key in new_data) {
-							if (data.length == 0) {
-								data.push({label: key, data: new_data[key]});
-							} else {
-								var i;
-								for (i = 0; i < data.length; i += 1) {
-									if (data[i]['label'] == key) {
-										// Start to remove old points if amount of
-										// point is more then this (per curve).
-										if (data[i]['data'].length > 20) {
-											data[i]['data'].shift();
-										}
-										data[i]['data'] = data[i]['data'].concat(new_data[key]);
-										break;
-									}
-								}
-
-								if (i == data.length) {
-									// New curve. Add to plot.
-									data.push({label: key, data: new_data[key]});
-								}
+						for (var plot in new_data) {
+							var temp_data = [];
+							var p = $("#" + plot);
+							if (p.length == 0) {
+								$("#body").append('<div style="float:left;width:800px;height:450px;margin:20px;"><h1>' + plot + '</h1><div id="' + plot + '" style="width:800px;height:400px;"></div></div>');
+								p = $("#" + plot);
+								plots[plot] = $.plot($("#" + plot), [], options);
 							}
-						}
 
-						if (plot == null) {
-							plot = $.plot($("#placeholder"), data, options);
-						} else {
-							plot.setData(data);
-							plot.setupGrid();
-							plot.draw();
+							if (!(plot in data)) {
+								data[plot] = [];
+							}
+
+							for (var curve in new_data[plot]) {
+								if (!(curve in data[plot])) {
+									data[plot][curve] = [];
+								}
+
+								// Fill data with points amount of zeros.
+								while (data[plot][curve].length < points) {
+									data[plot][curve].push(0);
+								}
+
+								// Push in the new data and shift out the old.
+								while (new_data[plot][curve].length > 0) {
+									data[plot][curve].shift();
+									data[plot][curve].push(new_data[plot][curve].shift());
+								}
+
+								// Zip with correct x placement on plot.
+								var res = [];
+								for (var i = 0; i < data[plot][curve].length; ++i) {
+									res.push([i, data[plot][curve][i]]);
+								}
+								temp_data.push({label: curve, data: res});
+							}
+							plots[plot].setData(temp_data);
+							plots[plot].setupGrid();
+							plots[plot].draw();
 						}
 					},
 					complete: function() {
-						setTimeout(updateData, 100);
+						setTimeout(updateData, 50);
 					}
 				});
 			}

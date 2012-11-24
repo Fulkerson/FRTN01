@@ -3,7 +3,7 @@ from random import SystemRandom
 import json
 import re
 
-DIR = '../plot/'
+DIR = 'batchtank/static'
 
 class RequestHandler(BaseHTTPRequestHandler):
     _rand = SystemRandom()
@@ -29,7 +29,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):
                 # Serve index!
-                f = open(DIR + 'index.htm')
+                f = open(DIR + '/index.htm')
 
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -44,7 +44,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 def main():
     try:
-        server = HTTPServer(('', 80), RequestHandler)
+        server = HTTPServer(('', 8080), RequestHandler)
         print 'Server running...'
         server.serve_forever()
     except KeyboardInterrupt:

@@ -33,21 +33,21 @@ class RequestHandler(BaseHTTPRequestHandler):
         bm.ParseFromSocket(self.procsoc)
 
         data = {"Temperature" : {},
-                "Water Level" : {}}
+                "WaterLevel" : {}}
 
         for s in bm.sample:
             if s.type == batchtank.TEMP:
                 data["Temperature"]["temp"] = s.value
             elif s.type == batchtank.LEVEL:
-                data["Water Level"]["level"] = s.value
+                data["WaterLevel"]["level"] = s.value
 
         for s in bm.signal:
             if s.type == batchtank.COOLER:
                 data["Temperature"]["u"] = s.value
                 data["Temperature"]["ref"] = s.ref
             elif s.type == batchtank.IN_PUMP_RATE:
-                data["Water Level"]["u"] = s.value
-                data["Water Level"]["ref"] = s.ref
+                data["WaterLevel"]["u"] = s.value
+                data["WaterLevel"]["ref"] = s.ref
 
         return data
 

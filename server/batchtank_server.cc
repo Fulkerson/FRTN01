@@ -5,6 +5,9 @@
 #include <cerrno>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
 
 //#define DEBUG
 
@@ -373,12 +376,24 @@ int
 main()
 {
     try {
+        /* GNU extension, not portable */
+        std::string config(program_invocation_short_name);
+        config += ".ini";
+
+        /* Parse config file */
+        boost::property_tree::ptree pt;
+        boost::property_tree::ini_parser::read_ini(config, pt);
+
+        int listenport = pt.get<int>("General.listenport");
+
         /* IO monitor for batchtank process */
         IORegistry ioreg;
 
         boost::asio::io_service io_service;
-        tcp::endpoint endpoint(tcp::v4(), 54000);
+        tcp::endpoint endpoint(tcp::v4(), listenport);
         tcp::acceptor acceptor(io_service, endpoint);
+
+        std::cout << "Listening to port: " << listenport << std::endl;
 
         while(true) {
             std::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));

@@ -42,6 +42,7 @@ bool Parameters::update_parameters() {
 			pt.get<double>("PID.K"),
 			pt.get<double>("PID.Ti"),
 			pt.get<double>("PID.Td"),
+			pt.get<double>("PID.Tr"),
 			pt.get<int>("General.period"),
 			pt.get<double>("PID.ref"),
 			pt.get<double>("PID.umin"),

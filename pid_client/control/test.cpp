@@ -16,7 +16,7 @@ int main(){
 	double ref = 5;
 	int period = 50;
 
-	PIDParameters pp(1,2,1,period,ref,0,10);
+	PIDParameters pp(1,2,1,5,period,ref,0,10);
 	PID pid;
 	pid.updateParameters(pp);
 	for (int i = 0; i < 5000; i++){

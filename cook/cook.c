@@ -23,7 +23,7 @@ int init(const char* path)
 {
 	struct termios  config = { 0 };
 
-	fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
+	fd = open(path, O_RDWR | O_NOCTTY);// | O_NDELAY);
 
 	/* Solved some errors */	
 	ioctl(fd, TCFLSH);
@@ -57,19 +57,20 @@ int init(const char* path)
 	/* Software flow control */
 	config.c_iflag &= ~(IXON | IXOFF | IXANY);
 
+	config.c_cc[VMIN]  = 0;
+    	config.c_cc[VTIME] = 10;
+
 	if (tcsetattr(fd, TCSANOW, &config) < 0) 
 		return -1;
 
 	return 1;
 }
 
-	
 int get(enum read_target chan)
 {
 	unsigned char	data;
 	unsigned char 	head[50] = { 0 };
 	unsigned char*	buff;
-	int		avail;
 	int		value;
 	unsigned char	c;
 	int		i;
@@ -82,46 +83,36 @@ int get(enum read_target chan)
 	
 	c = MORE_BIT;
 	buff = head;
-	avail = 0;
 	while (c & MORE_BIT) {	
-		while (!avail)
-			ioctl(fd, FIONREAD, &avail);
-	
-		if (-1 == read(fd, buff, avail)) 
-			return -1;
-	
-		c = buff[avail - 1];
-		buff = &buff[avail];
-		avail = 0;
-	}
+		if (-1 == read(fd, buff, 1)) 
+			return -2;
 
-	ioctl(fd, TCFLSH);
+		c = buff[0];
+		buff = &buff[1];	
+	}
 
 	value = 0;
 	for (i = 0; head[i] & MORE_BIT; i+=1) 
 		value = (value << 7) | (head[i] & 0x7f);
-	
-	printf("channel: %d\n", head[i]);
-	printf("value: %d\n", value);
+
+	value = (value << 2) | ((head[i] & 0x60) >> 5);	
 	return value;
 } 
+
+
+
+/* At most 1 byte can be set, i.e 0-255 */
 int set(enum set_target target, int value) 
 {
-	unsigned char 	data[50];	
-	int		i;
+	unsigned char 	data[2];	
 
-	i = 0;
-	do {
-		data[i] = MORE_BIT;
-		data[i] |= (value & 0x7f);
-		value = value >> 7;
-		i+=1;
-	} while (value > 0 && i < 50);
+	data[1] = target;
+	data[1] |= (value & 3) << 5;
+	value = value >> 2;
+	data[0] = MORE_BIT;
+	data[0] |= value;
 
-	data[i] = target;
-	i+=1;
-
-	if (-1 == write(fd, data, i))
+	if (-1 == write(fd, data, 2))
 		return -1;
 
 	return 1;

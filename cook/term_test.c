@@ -29,6 +29,8 @@ int main(void)
 		"example: \"s i 10\" means se pump in to 10\n");
 
 	val = 0;
+	target = -1;
+	se = -1;
 	while (EOF != (c = getchar())) {
 		switch (c) {
 			case 's':

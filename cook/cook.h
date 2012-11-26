@@ -18,12 +18,12 @@ enum set_target {
 };
 
 
-int get(enum read_target);			/* Get current value of target channel */
+int get(enum read_target);		/* Get current value of target channel*/
 
-int set(enum set_target, int value);		/* Set a value to target channel */
+int set(enum set_target, int value);	/* Set a value to target channel */
 
-int init(const char*);				/* Setup communication */
+int init(const char*);			/* Setup communication */
 
-int destroy(void);				/* Close communication */
+int destroy(void);			/* Close communication */
 
 

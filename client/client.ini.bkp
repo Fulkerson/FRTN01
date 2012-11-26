@@ -1,0 +1,26 @@
+# If controller executable is named "client", the
+# corresponding ini will be "client.ini".
+
+[General]
+ipaddress = 127.0.0.1
+port = 54000
+
+# Sensor to read from. Valid:
+# TEMP, LEVEL, IN PUMP, OUT PUMP, HEATER, COOLER, MIXER
+sensor = TEMP
+
+# Output to write control data to. Valid:
+# HEATER, COOLER, IN PUMP, OUT PUMP, MIXER
+output = HEATER
+
+# Period time in millis.
+period = 1000
+
+# These values are read on the fly.
+[PID]
+K = 1
+Ti = 2
+Td = 1
+ref = 2
+umin = -5
+umax = 5

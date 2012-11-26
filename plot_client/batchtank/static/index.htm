@@ -15,7 +15,7 @@
 			var plots = [];
 			var options = {
 				series: { shadowSize: 0 }, // Drawing is faster without shadows.
-			        yaxis: { min: 0, max: 100 },
+			        yaxis: { show: true, tickSize: 10 },
 			        xaxis: { show: false }
 			};
 
@@ -69,7 +69,7 @@
 						}
 					},
 					complete: function() {
-						setTimeout(updateData, 50);
+						setTimeout(updateData, 100);
 					}
 				});
 			}

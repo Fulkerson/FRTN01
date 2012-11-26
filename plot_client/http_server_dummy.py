@@ -18,14 +18,14 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 self.wfile.write(f.read())
                 f.close()
-            elif (self.path.startswith('/data.php')):
+            elif (self.path.startswith('/data')):
                 self.send_response(200)
                 self.send_header('Cache-Control', 'no-cache, must-revalidate')
                 self.send_header('Content-type', 'application/json;charset=utf-8')
                 self.end_headers()
 
 		out = '{"Heater":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Cooler":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump1":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump2":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']}}';
-                print out
+
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):
                 # Serve index!

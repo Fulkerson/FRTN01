@@ -7,12 +7,15 @@ PROTO_DIR = ../proto
 
 all: batchtank_server
 
-batchtank_server: batchtank_server.o batchtank.pb.o
-	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o $(LDLIBS) \
+batchtank_server: batchtank_server.o batchtank.pb.o cook.o
+	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o cook.o $(LDLIBS) \
 		-o batchtank_server
 
 batchtank_server.o: batchtank_server.cc batchtank.pb.h ../common/message_utils.h
 	$(CXX) -c $(CXXFLAGS) batchtank_server.cc -o batchtank_server.o
+
+cook.o: ../cook/cook.c
+	$(CXX) -c $(CXXFLAGS) ../cook/cook.c -o cook.o
 
 batchtank.pb.o: batchtank.pb.cc
 	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o

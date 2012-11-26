@@ -3,21 +3,21 @@ package batchtank_messages;
 //option optimize_for = LITE_RUNTIME;
 
 enum Sensor {
-    TEMP = 1;
-    LEVEL = 2;
-    IN_PUMP_RATE = 3;
-    OUT_PUMP_RATE = 4;
-    HEATER_RATE = 5;
-    MIXER_RATE = 6;
-    COOLER_RATE = 7;
+    TEMP = 0;
+    LEVEL = 1;
+    IN_PUMP_RATE = 2;
+    OUT_PUMP_RATE = 3;
+    HEATER_RATE = 4;
+    MIXER_RATE = 5;
+    COOLER_RATE = 6;
 }
 
 enum Output {
-    HEATER = 1;
-    COOLER = 2;
-    IN_PUMP = 3;
-    OUT_PUMP = 4;
-    MIXER = 5;
+    HEATER = 0;
+    COOLER = 1;
+    IN_PUMP = 2;
+    OUT_PUMP = 3;
+    MIXER = 4;
 }
 
 message BaseMessage {

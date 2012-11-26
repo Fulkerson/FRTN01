@@ -7,6 +7,8 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 
+#include <sys/times.h>
+#include <sys/time.h>
 #include "cook.h"
 
 #define MORE_BIT		(0x80)
@@ -74,7 +76,7 @@ int get(enum read_target chan)
 	int		value;
 	unsigned char	c;
 	int		i;
-	
+
 	data = chan;
 	data |= GET_VAL;
 

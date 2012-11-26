@@ -28,11 +28,18 @@ int main(void)
 		"v=tells that now comes an integer\n"
 		"example: \"s i 10\" means se pump in to 10\n");
 
+
 	val = 0;
 	target = -1;
 	se = -1;
 	while (EOF != (c = getchar())) {
 		switch (c) {
+			case 'f':
+				for (int i = 0; i < 10000; i+=1) {
+					set(COOLER, 255);
+					printf("GET %d\n", get(TEMP));
+				}
+				break;
 			case 's':
 				se = 1;		
 				break;

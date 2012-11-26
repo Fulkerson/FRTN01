@@ -6,7 +6,7 @@
 
 PIDParameters::PIDParameters(double K, double Ti, double Td, int period,
 	double ref, double min, double max) :
-	h(period/1000), Kp(K), Ki(K/Ti), Kd(K*Td), 
+	h(period/1000), Kp(K), Ki(K*period/1000/Ti), Kd(K*Td/period*1000), 
 	r(ref), umin(min), umax(max) {}
 PIDParameters::PIDParameters() :
 	Kp(0), Ki(0), Kd(0), h(1), r(0), umin(0), umax(0) {}
@@ -23,6 +23,9 @@ PID::PID() : I(0), eo(0), u(0), v(0) {}
 
 void PID::updateParameters(const PIDParameters& params) {
 	p = params;
+	std::cout << p.Kp << "\n";
+	std::cout << p.Ki << "\n";
+	std::cout << p.Kd << "\n";
 }
 
 double PID::next(double y){

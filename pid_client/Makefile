@@ -2,7 +2,7 @@
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
 
-BIN_NAME= client
+BIN_NAME= pid_client
 PROTO_DIR = ../proto
 
 INCLUDE_PATH=.

@@ -21,6 +21,7 @@
 
 #include "batchtank_server.h"
 #include "../common/message_utils.h"
+#include "../cook/cook.h"
 
 /* Used to silence compiler when unused vars. */
 #define UNUSED(expr) if(0) { (void)(expr); }
@@ -40,9 +41,41 @@ add_timespec(timespec t1, timespec t2)
     return t;
 }
 
-IORegistry::IORegistry()
+IORegistry::IORegistry(std::string tty)
 {
+    if (init(tty.c_str()) == -1) {
+        throw init_error;
+    }
+    std::cout << "Batchtank process initialized." << std::endl;
     /* Set values for signals */
+    heater = get(HEATER_RATE);
+    heater_ref = 0;
+    cooler = get(COOLER_RATE);
+    cooler_ref = 0;
+    in_pump = get(IN_PUMP_RATE);
+    in_pump_ref = 0;
+    out_pump = get(OUT_PUMP_RATE);
+    out_pump_ref = 0;
+    mixer = get(MIXER_RATE);
+    mixer_ref = 0;
+}
+
+IORegistry::~IORegistry()
+{
+    std::cout << "Destroying batchtank process." << std::endl;
+    destroy();
+}
+
+void
+IORegistry::setTemp(int32_t value)
+{
+    temp = value;
+}
+
+void
+IORegistry::setLevel(int32_t value)
+{
+    level = value;
 }
 
 int32_t
@@ -88,35 +121,46 @@ IORegistry::getReference(messages::OutputType type)
 int32_t
 IORegistry::getSensor(messages::SensorType type)
 {
+    int32_t value = 0;
+
     std::cout << "GET ";
     switch(type) {
         case messages::TEMP:
             std::cout << "TEMP: ";
+            value = temp;
             break;
         case messages::LEVEL:
             std::cout << "LEVEL: ";
+            value = level;
             break;
         case messages::IN_PUMP_RATE:
             std::cout << "IN_PUMP_RATE: ";
+            value = in_pump;
             break;
         case messages::OUT_PUMP_RATE:
             std::cout << "OUT_PUMP_RATE: ";
+            value = out_pump;
             break;
         case messages::HEATER_RATE:
             std::cout << "HEATER_RATE: ";
+            value = heater;
             break;
         case messages::MIXER_RATE:
             std::cout << "MIXER_RATE: ";
+            value = mixer;
             break;
         case messages::COOLER_RATE:
             std::cout << "COOLER_RATE: ";
+            value = cooler;
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
-            break;
+            throw get_error;
     }
-    std::cout << 2 << std::endl;
-    return 2;
+
+    std::cout << value << std::endl;
+
+    return value;
 }
 
 void
@@ -151,9 +195,13 @@ IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
-            break;
+            throw set_error;
     }
     std::cout << value << std::endl;
+
+    if (set((enum set_target) type, value) < 0) {
+        throw set_error;
+    }
 }
 
 Sampler::Sampler(std::vector<messages::SensorType>& sensors, IORegistry& ioreg,
@@ -188,6 +236,26 @@ Sampler::operator()()
     }
 }
 
+
+Poller::Poller(IORegistry& ioreg) : ioreg(ioreg)
+{}
+
+void
+Poller::operator()()
+{
+    int32_t temp  = get(TEMP);
+    int32_t level = get(LEVEL);
+
+    if (temp < 0 || level < 0) {
+        throw get_error;
+    }
+
+    {
+        boost::lock_guard<boost::mutex> lock(ioreg.mutex);
+        ioreg.setTemp(temp);
+        ioreg.setLevel(level);
+    }
+}
 
 PeriodicTask::PeriodicTask(int32_t period, std::function<void()> task) :
     period(period), task(task){}
@@ -372,9 +440,30 @@ ConnectionThread::run()
 }
 
 
+class KeyboardInterupt: public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "CTRL+C interrupt";
+    }
+} interrupt;
+
+
+void
+got_signal(int)
+{
+    destroy();
+    throw interrupt;
+}
+
 int
 main()
 {
+    struct sigaction sa;
+    memset( &sa, 0, sizeof(sa) );
+    sa.sa_handler = got_signal;
+    sigfillset(&sa.sa_mask);
+    sigaction(SIGINT,&sa,NULL);
+
     try {
         /* GNU extension, not portable */
         std::string config(program_invocation_short_name);
@@ -385,9 +474,15 @@ main()
         boost::property_tree::ini_parser::read_ini(config, pt);
 
         int listenport = pt.get<int>("General.listenport");
+        int polltime = pt.get<int>("General.pollingtime");
+	std::string tty(pt.get<std::string>("General.serialport"));
 
         /* IO monitor for batchtank process */
-        IORegistry ioreg;
+        IORegistry ioreg(tty);
+
+        PeriodicTask poller(polltime, Poller(ioreg));
+        poller.start();
+
 
         boost::asio::io_service io_service;
         tcp::endpoint endpoint(tcp::v4(), listenport);

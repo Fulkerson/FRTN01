@@ -2,7 +2,7 @@
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
 
-BIN_NAME= client
+BIN_NAME= sim_client
 PROTO_DIR = ../proto
 
 INCLUDE_PATH=.
@@ -15,11 +15,11 @@ CXXFLAGS += -Wmissing-braces -Wparentheses
 
 CPPFLAGS+= -I$(INCLUDE_PATH)
 
-LDFLAGS+= -L$(LIB_PATH) -lcontrol -lprotobuf -lboost_system
+LDFLAGS+= -L$(LIB_PATH) -lprotobuf -lboost_system
 LDFLAGS+= -lboost_thread-mt -lrt
 
 OBJS= batchtank.pb.o main.o
-SUB_DIRS= control
+SUB_DIRS=
 
 all: $(OBJS)
 	for DIR in $(SUB_DIRS); do \

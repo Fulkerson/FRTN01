@@ -6,6 +6,28 @@
 
 namespace batchtank {
 
+
+class InitError: public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "Could not open init batchprocess";
+    }
+} init_error;
+
+class SetError: public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "Error when setting value";
+    }
+} set_error;
+
+class GetError: public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "Error when getting value";
+    }
+} get_error;
+
 /* message alias for protobuf messages. */
 namespace messages {
     using namespace batchtank_messages;
@@ -15,17 +37,19 @@ namespace messages {
 
 }
 
-
 /* Monitor class used to interface with the batch process. */
 class IORegistry {
     public:
-        IORegistry();
+        IORegistry(std::string tty);
+        ~IORegistry();
         /* Used for locking when writing/reading to the batch process. */
         boost::mutex mutex;
         int32_t getSensor(messages::SensorType);
         int32_t getOutput(messages::OutputType);
         int32_t getReference(messages::OutputType);
         void setOutput(messages::OutputType, int32_t value, int32_t ref);
+        void setTemp(int32_t);
+        void setLevel(int32_t);
     private:
         /* Signal copies, allow plotter to read control signals etc. */
         int32_t heater;
@@ -38,6 +62,10 @@ class IORegistry {
         int32_t out_pump_ref;
         int32_t mixer;
         int32_t mixer_ref;
+
+        /* Process values */
+        int32_t temp;
+        int32_t level;
 };
 
 
@@ -82,6 +110,15 @@ class Sampler {
         IORegistry& ioreg;
         boost::asio::ip::tcp::socket& m_Socket;
         boost::mutex& write_mutex;
+};
+
+/* Function object used for polling the process */
+class Poller {
+    public:
+        Poller(IORegistry&);
+        void operator()();
+    private:
+        IORegistry& ioreg;
 };
 
 }

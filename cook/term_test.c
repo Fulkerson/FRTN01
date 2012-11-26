@@ -16,7 +16,13 @@ int main(void)
 	int 	target;
 	int	val;
 
-	init("/dev/ttyUSB0");
+	printf("Init\n");
+	if (init("/dev/ttyUSB0") == -1) {
+		printf("Could not init batch process.\n");
+		destroy();
+		return 1;
+	}
+	printf("Init done\n");
 
 	printf("s:= se, g:= get\n"
 		"i:=pump in\n "

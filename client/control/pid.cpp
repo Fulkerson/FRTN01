@@ -26,7 +26,6 @@ void PID::updateParameters(const PIDParameters& params) {
 }
 
 double PID::next(double y){
-	double N = 10;
 	double e = p.r - y;
 	u = v = p.Kp*e + I + p.Kd*(e-eo);
 	if (u > p.umax)
@@ -38,7 +37,6 @@ double PID::next(double y){
 }
 
 void PID::updateStates() {
-	double Tr = 5;
-	I = I + p.Ki*eo; // + (p.h/Tr)*(u-uo);
+	I = I + p.Ki*eo + (p.h)*(u-v);
 }
 

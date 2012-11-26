@@ -13,5 +13,5 @@ all:
 test:
 	$(CC) -o term_test $(CFLAGS) $(FILE) $(TEST_FILE)
 clean: 
-	rm  *.o
-	rm term_test
+	rm -rf  *.o
+	rm -rf term_test

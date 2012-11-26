@@ -18,19 +18,13 @@ using namespace batchtank;
 
 class Parameters {
 	public:
-		double K;
-		double Td;
-		double Ti;
-		double ref;
-		double umin;
-		double umax;
+		PIDParameters pp;
 
 		Parameters(std::string config);
 
 		// Return true if parameters were updated.
 		bool update_parameters();
 
-		friend std::ostream& operator <<(std::ostream&, const Parameters&);
 
 	private:
 		boost::property_tree::ptree pt;
@@ -38,24 +32,21 @@ class Parameters {
 		time_t last_change;
 };
 
-std::ostream& operator <<(std::ostream& os, const Parameters& p) {
-	os << "K=" << p.K << " Ti=" << p.Ti << " Td=" << p.Td;
-	os << " ref="<< p.ref << " umin=" << p.umin << " umax=" << p.umax;
-	return os;
-}
-
 bool Parameters::update_parameters() {
 	// Check when .ini was last modified.
 	struct stat attr;
 	stat(config.c_str(), &attr);
 	if (attr.st_mtime > last_change) {
 		boost::property_tree::ini_parser::read_ini(config, pt);
-		K = pt.get<double>("PID.K");
-		Ti = pt.get<double>("PID.Ti");
-		Td = pt.get<double>("PID.Td");
-		ref = pt.get<double>("PID.ref");
-		umin = pt.get<double>("PID.umin");
-		umax = pt.get<double>("PID.umax");
+		pp = PIDParameters(
+			pt.get<double>("PID.K"),
+			pt.get<double>("PID.Ti"),
+			pt.get<double>("PID.Td"),
+			pt.get<int>("General.period"),
+			pt.get<double>("PID.ref"),
+			pt.get<double>("PID.umin"),
+			pt.get<double>("PID.umax")
+		);
 		last_change = attr.st_mtime;
 		return true;
 	} else {
@@ -63,9 +54,12 @@ bool Parameters::update_parameters() {
 	}
 }
 
-Parameters::Parameters(std::string config) : K(0), Td(0), Ti(0),
-	ref(0), umin(0), umax(0), config(config), last_change(0) {}
+std::ostream& operator <<(std::ostream& os, const Parameters& p) {
+	os << p.pp;
+	return os;
+}
 
+Parameters::Parameters(std::string config) : config(config), last_change(0) {}
 
 int main(int argc, char* argv[]) {
 	// In some uses argv[0] might not contain executable name.
@@ -83,7 +77,7 @@ int main(int argc, char* argv[]) {
 
 	std::string ip(pt.get<std::string>("General.ipaddress"));
         int port = pt.get<int>("General.port");
-	int period = pt.get<int>("General.period");
+//	int period = pt.get<int>("General.period");
 
 	messages::Sensor sensor;
 
@@ -127,8 +121,12 @@ int main(int argc, char* argv[]) {
 
 	// Setup a parameter parser.
 	Parameters parameters(config);
+//	parameters.update_parameters();
+//			std::cout << "New parameters:" << std::endl;
+//	       		std::cout << parameters << std::endl;
 
         std::unique_ptr<PID> pid;
+		pid.reset(new PID());
 
     try {
         boost::asio::io_service io_service;
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
         // First register for sensor data
         messages::BaseMessage msg;
         messages::Register* reg = msg.mutable_register_();
-        reg->set_periodtime(period);
+        reg->set_periodtime(pt.get<int>("General.period"));
         reg->add_type(sensor);
         
         // Send message 
@@ -158,11 +156,7 @@ int main(int argc, char* argv[]) {
         while (true) {
 		// Update parameters if needed.
 		if (parameters.update_parameters()) {
-			pid.reset(new PID(parameters.K, parameters.Ti,
-					parameters.Td,
-					parameters.ref,
-					parameters.umin,
-					parameters.umax));
+			pid->updateParameters(parameters.pp);
 			std::cout << "New parameters:" << std::endl;
 	       		std::cout << parameters << std::endl;
 		}
@@ -202,8 +196,10 @@ int main(int argc, char* argv[]) {
             messages::ControlSignal* sig = msg.add_signal();
             sig->set_type(output);
             sig->set_value(value);
-            sig->set_ref(parameters.ref);
+            sig->set_ref(parameters.pp.r);
             out << msg;
+
+			pid->updateStates();
         }
     } catch (std::exception& e)  {
         std::cerr << e.what() << std::endl;

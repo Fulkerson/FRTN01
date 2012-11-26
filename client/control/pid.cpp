@@ -6,7 +6,7 @@
 
 PIDParameters::PIDParameters(double K, double Ti, double Td, int period,
 	double ref, double min, double max) :
-	h(period/1000), Kp(K), Ki(1/Ti), Kd(Td), 
+	h(period/1000), Kp(K), Ki(K/Ti), Kd(K*Td), 
 	r(ref), umin(min), umax(max) {}
 PIDParameters::PIDParameters() :
 	Kp(0), Ki(0), Kd(0), h(1), r(0), umin(0), umax(0) {}

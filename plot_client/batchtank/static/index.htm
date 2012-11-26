@@ -27,43 +27,45 @@
 					success: function(new_data) {
 						for (var plot in new_data) {
 							var temp_data = [];
-							var p = $("#" + plot);
+							var plot_id = plot.replace(" ", "").toLowerCase(); 
+							var p = $("#" + plot_id);
 							if (p.length == 0) {
-								$("#body").append('<div style="float:left;width:800px;height:450px;margin:20px;"><h1>' + plot + '</h1><div id="' + plot + '" style="width:800px;height:400px;"></div></div>');
-								p = $("#" + plot);
-								plots[plot] = $.plot($("#" + plot), [], options);
+								$("#body").append('<div style="float:left;width:800px;height:450px;margin:20px;"><h1>' + plot + '</h1><div id="' + plot_id + '" style="width:800px;height:400px;"></div></div>');
+								p = $("#" + plot_id);
+								plots[plot_id] = $.plot($("#" + plot_id), [], options);
 							}
 
-							if (!(plot in data)) {
-								data[plot] = [];
+							if (!(plot_id in data)) {
+								data[plot_id] = [];
 							}
 
 							for (var curve in new_data[plot]) {
-								if (!(curve in data[plot])) {
-									data[plot][curve] = [];
+								var curve_id = curve.replace(" ", "").toLowerCase();
+								if (!(curve_id in data[plot_id])) {
+									data[plot_id][curve_id] = [];
 								}
 
 								// Fill data with points amount of zeros.
-								while (data[plot][curve].length < points) {
-									data[plot][curve].push(0);
+								while (data[plot_id][curve_id].length < points) {
+									data[plot_id][curve_id].push(0);
 								}
 
 								// Push in the new data and shift out the old.
 								while (new_data[plot][curve].length > 0) {
-									data[plot][curve].shift();
-									data[plot][curve].push(new_data[plot][curve].shift());
+									data[plot_id][curve_id].shift();
+									data[plot_id][curve_id].push(new_data[plot][curve].shift());
 								}
 
 								// Zip with correct x placement on plot.
 								var res = [];
-								for (var i = 0; i < data[plot][curve].length; ++i) {
-									res.push([i, data[plot][curve][i]]);
+								for (var i = 0; i < data[plot_id][curve_id].length; ++i) {
+									res.push([i, data[plot_id][curve_id][i]]);
 								}
 								temp_data.push({label: curve, data: res});
 							}
-							plots[plot].setData(temp_data);
-							plots[plot].setupGrid();
-							plots[plot].draw();
+							plots[plot_id].setData(temp_data);
+							plots[plot_id].setupGrid();
+							plots[plot_id].draw();
 						}
 					},
 					complete: function() {

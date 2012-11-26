@@ -24,7 +24,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json;charset=utf-8')
                 self.end_headers()
 
-		out = '{"Heater":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Cooler":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump1":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump2":{"ref":[' + str(int(self._rand.random() * 30 + 20)) + '],"out":[' + str(int(self._rand.random() * 30 + 20)) + '],"in":[' + str(int(self._rand.random() * 30 + 20)) + ']}}';
+		out = '{"Heater":{"Reference":[' + str(int(self._rand.random() * 30 + 20)) + '],"Out":[' + str(int(self._rand.random() * 30 + 20)) + '],"In":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Cooler":{"Reference":[' + str(int(self._rand.random() * 30 + 20)) + '],"Out":[' + str(int(self._rand.random() * 30 + 20)) + '],"In":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump 1":{"Reference":[' + str(int(self._rand.random() * 30 + 20)) + '],"Out":[' + str(int(self._rand.random() * 30 + 20)) + '],"In":[' + str(int(self._rand.random() * 30 + 20)) + ']},"Pump 2":{"Reference":[' + str(int(self._rand.random() * 30 + 20)) + '],"Out":[' + str(int(self._rand.random() * 30 + 20)) + '],"In":[' + str(int(self._rand.random() * 30 + 20)) + ']}}';
 
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):

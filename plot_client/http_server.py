@@ -1,6 +1,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from random import SystemRandom
 from urlparse import urlparse, parse_qs
+from collections import defaultdict
 
 import json
 import re
@@ -8,16 +9,11 @@ import os
 import socket
 import batchtank
 
-DIR = 'batchtank/static'
+DIR = 'batchtank/static' 
 
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args):
-        self._rand = SystemRandom()
-        self.procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # TODO: Connect with server running.
-        self.procsoc.connect(("localhost", 54000))
-
+        self.procsoc = procsoc
         BaseHTTPRequestHandler.__init__(self, *args)
 
     def getData(self):
@@ -32,22 +28,22 @@ class RequestHandler(BaseHTTPRequestHandler):
         bm = batchtank.BaseMessage()
         bm.ParseFromSocket(self.procsoc)
 
-        data = {"Temperature" : {},
-                "WaterLevel" : {}}
+        data = {"Temperature" : defaultdict(list),
+                "WaterLevel" : defaultdict(list)}
 
         for s in bm.sample:
             if s.type == batchtank.TEMP:
-                data["Temperature"]["temp"] = s.value
+                data["Temperature"]["temp"].append(s.value)
             elif s.type == batchtank.LEVEL:
-                data["WaterLevel"]["level"] = s.value
+                data["WaterLevel"]["level"].append(s.value)
 
         for s in bm.signal:
             if s.type == batchtank.COOLER:
-                data["Temperature"]["u"] = s.value
-                data["Temperature"]["ref"] = s.ref
+                data["Temperature"]["u"].append(s.value)
+                data["Temperature"]["ref"].append(s.ref)
             elif s.type == batchtank.IN_PUMP_RATE:
-                data["WaterLevel"]["u"] = s.value
-                data["WaterLevel"]["ref"] = s.ref
+                data["WaterLevel"]["u"].append(s.value)
+                data["WaterLevel"]["ref"].append(s.ref)
 
         return data
 
@@ -92,6 +88,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 def main():
     try:
+        global procsoc
+        procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # TODO: Connect with server running.
+        procsoc.connect(("localhost", 54000))
+
         server = HTTPServer(('', 8080), RequestHandler)
         print 'Server running...'
         server.serve_forever()

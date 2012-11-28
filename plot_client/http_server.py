@@ -22,6 +22,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         bm.getOutput.append(batchtank.COOLER)
         bm.getSensor.append(batchtank.LEVEL)
         bm.getOutput.append(batchtank.IN_PUMP_RATE)
+        bm.getOutput.append(batchtank.OUT_PUMP_RATE)
 
         bm.SerializeToSocket(self.procsoc)
 
@@ -42,8 +43,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 data["Temperature"]["u"].append(s.value)
                 data["Temperature"]["ref"].append(s.ref)
             elif s.type == batchtank.IN_PUMP_RATE:
-                data["WaterLevel"]["u"].append(s.value)
-                data["WaterLevel"]["ref"].append(s.ref)
+                data["WaterLevel"]["in u"].append(s.value)
+                data["WaterLevel"]["in ref"].append(s.ref)
+            elif s.type == batchtank.OUT_PUMP_RATE:
+                data["WaterLevel"]["out u"].append(s.value)
+                data["WaterLevel"]["out ref"].append(s.ref)
 
         return data
 
@@ -67,7 +71,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                 out = json.dumps(self.getData())
 
-                print out
+                #print out
 
                 self.wfile.write(out)
             elif (self.path == '/' or self.path == '/index.html' or self.path == '/index.htm'):

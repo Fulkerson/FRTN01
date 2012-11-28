@@ -25,7 +25,7 @@ int init(const char* path)
 {
 	struct termios  config = { 0 };
 
-	fd = open(path, O_RDWR | O_NOCTTY); // | O_NDELAY);
+	fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
 	fcntl(fd, F_SETFL, 0);
 
 	/* Solved some errors */	

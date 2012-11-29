@@ -39,17 +39,24 @@ The client may respond with control signal events which specify what
 value should be set as well as to what output. Also contains the
 reference value used for this controlsignal.
 
-Setting and getting values on the batch process is protected by a
-IORegistry however locking of the registry external, i.e. it contains a
-public mutex and does no locking on it's own. This is done in order to
-enable batching several gets and sets as one atomic operation.
+Setting and getting values from the batch process is protected by a
+IORegistry however locking of the registry is external, i.e. it contains a
+public mutex and does no locking on its own. This is done in order to
+enable batching several gets and sets as single atomic operations.
 The IORegistry also contains copies of reference values as well as
 control signals for plotting use cases.
+
+Since calls to the process are fairly slow a polling thread updates the
+IORegistry monitor on a periodic basis.
 
 
 Design choices
 --------------
-Protocol buffers are used for serialization of messages. 
+The server is written in C++ in order to run well on the Raspberry Pi as
+there is currently not any acceptable JVM with proper JIT available. It
+also makes calling timing functions more appropriate for real time tanks
+considerably easier.
+
 
 
 BUILD Debian/Ubuntu/Raspbian

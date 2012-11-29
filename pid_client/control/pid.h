@@ -24,6 +24,7 @@ class PID
 private:
 	double I, eo, u, v;
 	PIDParameters p;
+	double limit(double,double,double);
 public:
 	PID();
 	void updateParameters(const PIDParameters&);

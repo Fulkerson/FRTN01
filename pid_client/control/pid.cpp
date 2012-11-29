@@ -7,7 +7,7 @@
 PIDParameters::PIDParameters(double K, double Ti, double Td, double Tr,
 				int period, double ref, double min, double max, bool inverted) :
 		h(period/1000), Kp(K), Ki(Ti==0 ? 0 : K*period/1000/Ti),
-		Kd(K*Td/period*1000), track(period/1000/Tr),
+		Kd(K*Td/period*1000), track(Tr==0 ? 0 : period/1000/Tr),
 		r(ref), umin(min), umax(max), inverted(inverted) {}
 
 PIDParameters::PIDParameters() :
@@ -31,18 +31,21 @@ void PID::updateParameters(const PIDParameters& params)
 	p = params;
 }
 
-double PID::next(double y)
+
+double PID::limit(double x, double min, double max)
 {
+	if (x < min)
+		return min;
+	if (x > max)
+		return max;
+	return x;
+}
+
+double PID::next(double y)
+{	
 	double e = p.r - y;
-	u = v = p.Kp*e + I + p.Kd*(e-eo);
-	if (u > p.umax) {
-		u = p.umax;
-		v = p.umax;
-	}
-	if (u < p.umin) {
-		u = p.umin;
-		v = p.umin;
-	}
+	v = p.Kp*e + I + p.Kd*(e-eo);
+	u = limit(v, p.umin, p.umax);
 	eo = e;
 	if (!p.inverted) {
 		return u;
@@ -53,7 +56,7 @@ double PID::next(double y)
 
 void PID::updateStates()
 {
-	double Tr = 10;
-	I = I + p.Ki*eo + p.track*(u-v);
+	I = I + p.Ki*eo; + p.track*(u-v);
+	I = limit(I,p.umin,p.umax);
 }
 

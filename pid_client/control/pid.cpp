@@ -5,7 +5,7 @@
 
 
 PIDParameters::PIDParameters(double K, double Ti, double Td, double Tr,
-				int period, double ref, double min, double max, bool inverted) :
+				double period, double ref, double min, double max, bool inverted) :
 		h(period/1000), Kp(K), Ki(Ti==0 ? 0 : K*period/1000/Ti),
 		Kd(K*Td/period*1000), track(Tr==0 ? 0 : period/1000/Tr),
 		r(ref), umin(min), umax(max), inverted(inverted) {}

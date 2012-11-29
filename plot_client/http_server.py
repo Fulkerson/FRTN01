@@ -19,35 +19,47 @@ class RequestHandler(BaseHTTPRequestHandler):
     def getData(self):
         bm = batchtank.BaseMessage()
         bm.getSensor.append(batchtank.TEMP)
+        bm.getOutput.append(batchtank.HEATER)
         bm.getOutput.append(batchtank.COOLER)
         bm.getSensor.append(batchtank.LEVEL)
-        bm.getOutput.append(batchtank.IN_PUMP_RATE)
-        bm.getOutput.append(batchtank.OUT_PUMP_RATE)
+        bm.getSensor.append(batchtank.MIXER_RATE)
+        bm.getSensor.append(batchtank.OUT_PUMP_RATE)
+        bm.getOutput.append(batchtank.IN_PUMP)
+        bm.getOutput.append(batchtank.MIXER)
+        bm.getOutput.append(batchtank.OUT_PUMP)
 
         bm.SerializeToSocket(self.procsoc)
 
         bm = batchtank.BaseMessage()
         bm.ParseFromSocket(self.procsoc)
 
-        data = {"Temperature" : defaultdict(list),
-                "WaterLevel" : defaultdict(list)}
+        # {"Name": { "var": [1, 2, 3]} }
+        data = defaultdict(lambda: defaultdict(list))
 
         for s in bm.sample:
             if s.type == batchtank.TEMP:
                 data["Temperature"]["temp"].append(s.value)
             elif s.type == batchtank.LEVEL:
                 data["WaterLevel"]["level"].append(s.value)
+            elif s.type == batchtank.MIXER_RATE:
+                data["Mixer"]["rate"].append(s.value)
 
         for s in bm.signal:
-            if s.type == batchtank.COOLER:
-                data["Temperature"]["u"].append(s.value)
-                data["Temperature"]["ref"].append(s.ref)
-            elif s.type == batchtank.IN_PUMP_RATE:
-                data["WaterLevel"]["in u"].append(s.value)
+            if s.type == batchtank.HEATER:
+                data["Heater"]["u"].append(s.value)
+                data["Temperature"]["h_ref"].append(s.ref)
+            elif s.type == batchtank.COOLER:
+                data["Cooler"]["u"].append(s.value)
+                data["Temperature"]["c_ref"].append(s.ref)
+            elif s.type == batchtank.IN_PUMP:
+                data["WaterLevel"]["u"].append(s.value)
                 data["WaterLevel"]["in ref"].append(s.ref)
-            elif s.type == batchtank.OUT_PUMP_RATE:
-                data["WaterLevel"]["out u"].append(s.value)
-                data["WaterLevel"]["out ref"].append(s.ref)
+            elif s.type == batchtank.OUT_PUMP:
+                data["Out Pump"]["u"].append(s.value)
+                data["Out Pump"]["out ref"].append(s.ref)
+            elif s.type == batchtank.MIXER:
+                data["Mixer"]["u"].append(s.value)
+                data["Mixer"]["ref"].append(s.ref)
 
         return data
 

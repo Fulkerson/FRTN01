@@ -10,44 +10,58 @@
 #include "../common/message_utils.h"
 #include <control/pid.h>
 
-namespace batchtank {
-	namespace messages = batchtank_messages;
+namespace batchtank
+{
+namespace messages = batchtank_messages;
 }
 
 using namespace batchtank;
 
-class Parameters {
-	public:
-		PIDParameters pp;
+class Parameters
+{
+public:
+	PIDParameters pp;
+	int period;
 
-		Parameters(std::string config);
+	Parameters(std::string config, int period);
 
-		// Return true if parameters were updated.
-		bool update_parameters();
+	// Return true if parameters were updated.
+	bool update_parameters();
 
 
-	private:
-		boost::property_tree::ptree pt;
-		std::string config;
-		time_t last_change;
+private:
+	boost::property_tree::ptree pt;
+	std::string config;
+	time_t last_change;
 };
 
-bool Parameters::update_parameters() {
+bool Parameters::update_parameters()
+{
 	// Check when .ini was last modified.
 	struct stat attr;
 	stat(config.c_str(), &attr);
 	if (attr.st_mtime > last_change) {
-		boost::property_tree::ini_parser::read_ini(config, pt);
+		bool try_again;
+		do {
+			try {
+				boost::property_tree::ini_parser::read_ini(config, pt);
+				try_again = false;
+			} catch (std::exception& e)  {
+				std::cerr << e.what() << std::endl;
+				try_again = true;
+			}
+		} while (try_again);
 		pp = PIDParameters(
-			pt.get<double>("PID.K"),
-			pt.get<double>("PID.Ti"),
-			pt.get<double>("PID.Td"),
-			pt.get<double>("PID.Tr"),
-			pt.get<int>("General.period"),
-			pt.get<double>("PID.ref"),
-			pt.get<double>("PID.umin"),
-			pt.get<double>("PID.umax")
-		);
+			     pt.get<double>("PID.K"),
+			     pt.get<double>("PID.Ti"),
+			     pt.get<double>("PID.Td"),
+			     pt.get<double>("PID.Tr"),
+				 period,
+			     pt.get<double>("PID.ref"),
+			     pt.get<double>("PID.umin"),
+			     pt.get<double>("PID.umax"),
+			     pt.get<bool>("PID.inverted")
+		     );
 		last_change = attr.st_mtime;
 		return true;
 	} else {
@@ -55,30 +69,34 @@ bool Parameters::update_parameters() {
 	}
 }
 
-std::ostream& operator <<(std::ostream& os, const Parameters& p) {
+std::ostream& operator <<(std::ostream& os, const Parameters& p)
+{
 	os << p.pp;
 	return os;
 }
 
-Parameters::Parameters(std::string config) : config(config), last_change(0) {}
+Parameters::Parameters(std::string config, int period) :
+		period(period), config(config), last_change(0) {}
 
-int main(int argc, char* argv[]) {
+
+int main(int argc, char* argv[])
+{
 	// In some uses argv[0] might not contain executable name.
 	if (argc < 1) {
 		std::cerr << "No implicit name given on cmdline" << std::endl;
 		return 1;
 	}
 	// Use executablename.ini as config
-        std::string config(argv[0]);
-        config += ".ini";
+	std::string config(argv[0]);
+	config += ".ini";
 
-        // Parse config file
-        boost::property_tree::ptree pt;
-        boost::property_tree::ini_parser::read_ini(config, pt);
+	// Parse config file
+	boost::property_tree::ptree pt;
+	boost::property_tree::ini_parser::read_ini(config, pt);
 
 	std::string ip(pt.get<std::string>("General.ipaddress"));
-        int port = pt.get<int>("General.port");
-//	int period = pt.get<int>("General.period");
+	int port = pt.get<int>("General.port");
+	int period = pt.get<int>("General.period");
 
 	messages::Sensor sensor;
 
@@ -105,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 	messages::Output output;
 	std::string output_(pt.get<std::string>("General.output"));
-	
+
 	if (output_ == "HEATER") {
 		output = messages::HEATER;
 	} else if (output_ == "COOLER") {
@@ -118,95 +136,93 @@ int main(int argc, char* argv[]) {
 		output = messages::MIXER;
 	} else {
 		std::cerr << "Invalid output" << std::endl;
+		return 1;
 	}
 
 	// Setup a parameter parser.
-	Parameters parameters(config);
-//	parameters.update_parameters();
-//			std::cout << "New parameters:" << std::endl;
-//	       		std::cout << parameters << std::endl;
+	Parameters parameters(config, period);
 
-        std::unique_ptr<PID> pid;
-		pid.reset(new PID());
+	PID pid;
 
-    try {
-        boost::asio::io_service io_service;
-        boost::asio::ip::tcp::endpoint endpoint(
-                boost::asio::ip::address::from_string(ip), port);
+	try {
+		boost::asio::io_service io_service;
+		boost::asio::ip::tcp::endpoint endpoint(
+		boost::asio::ip::address::from_string(ip), port);
 
-        tcp::socket socket(io_service);
-        socket.connect(endpoint);
-        std::cout << "Connected" << std::endl;
+		tcp::socket socket(io_service);
+		socket.connect(endpoint);
+		std::cout << "Connected" << std::endl;
 
-        // Socket to protobuf glue
-        MessageOutput<messages::BaseMessage, tcp::socket> out(socket);
+		// Socket to protobuf glue
+		MessageOutput<messages::BaseMessage, tcp::socket> out(socket);
 
-        // First register for sensor data
-        messages::BaseMessage msg;
-        messages::Register* reg = msg.mutable_register_();
-        reg->set_periodtime(pt.get<int>("General.period"));
-        reg->add_type(sensor);
-        
-        // Send message 
-        out << msg;
+		// First register for sensor data
+		messages::BaseMessage msg;
+		messages::Register* reg = msg.mutable_register_();
+		reg->set_periodtime(period);
+		reg->add_type(sensor);
 
-        // At the time of creation blocking calls are made so we must
-        // place this after registration is set up properly 
-        MessageInput<messages::BaseMessage, tcp::socket> input(socket);
+		// Send message
+		out << msg;
 
-        while (true) {
-		// Update parameters if needed.
-		if (parameters.update_parameters()) {
-			pid->updateParameters(parameters.pp);
-			std::cout << "New parameters:" << std::endl;
-	       		std::cout << parameters << std::endl;
-		}
+		// At the time of creation blocking calls are made so we must
+		// place this after registration is set up properly
+		MessageInput<messages::BaseMessage, tcp::socket> input(socket);
 
-            // Reusing messages are faster
-            msg.Clear();
+		while (true) {
 
-            // Read message 
-            input >> msg;
+			// Update parameters if needed.
+			if (parameters.update_parameters()) {
+				pid.updateParameters(parameters.pp);
+				std::cout << "New parameters:" << std::endl;
+				std::cout << parameters << std::endl;
+			}
 
-            // See if there's any samples, there should be exactly one.
-            if (msg.sample_size() != 1) {
-                std::cerr << "Got incorrect number of samples!" << std::endl;
-                break;
-            }
+			// Reusing messages are faster
+			msg.Clear();
 
-            // Get sample 
-            messages::Sample s = msg.sample(0);
-            if (s.type() != sensor) {
-                std::cerr << "Didn't receive proper message" << std::endl;
-                break;
-            } else {
+			// Read message
+			input >> msg;
+
+			// See if there's any samples, there should be exactly one.
+			if (msg.sample_size() != 1) {
+				std::cerr << "Got incorrect number of samples!" << std::endl;
+				break;
+			}
+
+			// Get sample
+			messages::Sample s = msg.sample(0);
+			if (s.type() != sensor) {
+				std::cerr << "Didn't receive proper message" << std::endl;
+				break;
+			} else {
 #ifdef DEBUG
-                std::cout << "Received: " << msg.DebugString() << std::endl;
+				std::cout << "Received: " << msg.DebugString() << std::endl;
 #endif
-            }
-            
-            double value = s.value();
+			}
 
-            // Do stuff with sample data
-		value = pid->next(value);
+			double value = s.value();
 
-            // Prepare for send 
-            msg.Clear();
+			// Do stuff with sample data
+			value = pid.next(value);
 
-            // Create control signal
-            messages::ControlSignal* sig = msg.add_signal();
-            sig->set_type(output);
-            sig->set_value(value);
-            sig->set_ref(parameters.pp.r);
-            out << msg;
+			// Prepare for send
+			msg.Clear();
 
-			pid->updateStates();
-        }
-    } catch (std::exception& e)  {
-        std::cerr << e.what() << std::endl;
-    }
+			// Create control signal
+			messages::ControlSignal* sig = msg.add_signal();
+			sig->set_type(output);
+			sig->set_value(value);
+			sig->set_ref(parameters.pp.r);
+			out << msg;
 
-    return 0;
+			pid.updateStates();
+		}
+	} catch (std::exception& e)  {
+		std::cerr << e.what() << std::endl;
+	}
+
+	return 0;
 }
 
 

@@ -42,16 +42,15 @@ double PID::limit(double x, double min, double max)
 }
 
 double PID::next(double y)
-{	
+{
+	double ymax = 600;
 	double e = p.r - y;
+	if (p.inverted)
+		e = -e;
 	v = p.Kp*e + I + p.Kd*(e-eo);
 	u = limit(v, p.umin, p.umax);
 	eo = e;
-	if (!p.inverted) {
-		return u;
-	} else {
-		return (p.umax - u);
-	}
+	return u;
 }
 
 void PID::updateStates()

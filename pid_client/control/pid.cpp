@@ -43,7 +43,6 @@ double PID::limit(double x, double min, double max)
 
 double PID::next(double y)
 {
-	double ymax = 600;
 	double e = p.r - y;
 	if (p.inverted)
 		e = -e;

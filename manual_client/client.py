@@ -1,38 +1,91 @@
 #!/usr/bin/env python
-import IPython
-from IPython.config.loader import Config
-cfg = Config()
-
-
 import socket
 import batchtank
 import ConfigParser
 
-namespace = {}
 
-namespace["MIXER"] = batchtank.MIXER
-namespace["MIXER_RATE"] = batchtank.MIXER_RATE
-namespace["OUT_PUMP"] = batchtank.OUT_PUMP
-namespace["OUT_PUMP_RATE"] = batchtank.OUT_PUMP_RATE
-namespace["IN_PUMP"] = batchtank.IN_PUMP
-namespace["IN_PUMP_RATE"] = batchtank.IN_PUMP_RATE
-namespace["LEVEL"] = batchtank.LEVEL
-namespace["TEMP"] = batchtank.TEMP
-namespace["COOLER"] = batchtank.COOLER
-namespace["COOLER_RATE"] = batchtank.COOLER_RATE
-namespace["HEATER"] = batchtank.HEATER
-namespace["HEATER_RATE"] = batchtank.HEATER_RATE
+class BatchProcess(object):
+    """Used to control parts of the batch process.
 
-class Controller(object):
-    def __init__(self, confpath):
-        ini = ConfigParser.ConfigParser()
-        ini.read(confpath)
-        port = ini.getint("General", "port")
-        hostname = ini.get("General", "hostname")
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((hostname, port))
+    Properties:
+        mixer    -- Rate of mixer    (0..255)
+        out_pump -- Rate of out pump (0..255)
+        in_pump  -- Rate of in pump  (0..255)
+        cooler   -- Rate of cooler   (0..255)
+        heater   -- Rate of heater   (0..255)
+        temp     -- Temperature      (???)
+        level    -- Level            (???)
 
-    def set(self, output, value):
+
+    Example:
+        >>> tank = BatchProcess(socket)
+
+        >>> tank.mixer = 255
+        >>> print tank.mixer
+        255
+        >>> tank.mixer = 50
+        >>> print tank.mixer
+        50
+    
+        >>> print tank.temp
+        340
+    """
+    def __init__(self, socket):
+        """
+        Args:
+            socket -- socket ready for transceiving
+        """
+        self.sock = socket
+
+    @property
+    def mixer(self):
+        return self._get(batchtank.MIXER_RATE)
+
+    @mixer.setter
+    def mixer(self, value):
+        self._set(batchtank.MIXER, value)
+
+    @property
+    def out_pump(self):
+        return self._get(batchtank.OUT_PUMP_RATE)
+
+    @out_pump.setter
+    def out_pump(self, value):
+        self._set(batchtank.OUT_PUMP, value)
+
+    @property
+    def in_pump(self):
+        return self._get(batchtank.IN_PUMP_RATE)
+
+    @in_pump.setter
+    def in_pump(self, value):
+        self._set(batchtank.IN_PUMP, value)
+
+    @property
+    def cooler(self):
+        return self._get(batchtank.COOLER_RATE)
+
+    @cooler.setter
+    def cooler(self, value):
+        self._set(batchtank.COOLER, value)
+
+    @property
+    def heater(self):
+        return self._get(batchtank.HEATER_RATE)
+
+    @heater.setter
+    def heater(self, value):
+        self._set(batchtank.HEATER, value)
+
+    @property
+    def temp(self):
+        return self._get(batchtank.TEMP)
+
+    @property
+    def level(self):
+        return self._get(batchtank.LEVEL)
+
+    def _set(self, output, value):
         if value > 255:
             value = 255
         elif value < 0:
@@ -42,36 +95,39 @@ class Controller(object):
         sig.ref = value
         sig.value = value
         sig.type = output
+        print bm
+        return None
         bm.SerializeToSocket(self.sock)
 
-    def get(self, sensor):
+    def _get(self, sensor):
         bm = batchtank.BaseMessage()
         bm.getSensor.append(sensor)
+
         bm.SerializeToSocket(self.sock)
         bm.Clear()
         bm.ParseFromSocket(self.sock)
-        print bm
 
-    def getall(self):
-        bm = batchtank.BaseMessage()
-        for _, s in namespace.items():
-            bm.getSensor.append(s)
-        bm.SerializeToSocket(self.sock)
-        bm.Clear()
-        bm.ParseFromSocket(self.sock)
-        print bm
+        return bm.sample[0].value
 
-namespace["proc"] = Controller("config.ini")
 
-banner = """Usage:
-proc.get(sensor)
-proc.set(output, value)
-sensor = MIXER_RATE | HEATER_RATE | COOLER_RATE | IN_PUMP_RATE | OUT_PUMP_RATE | LEVEL | TEMP
-output = MIXER | HEATER | COOLER | IN_PUMP | OUT_PUMP
+if __name__ == "__main__":
+    import IPython
+    from IPython.config.loader import Config
+    cfg = Config()
 
-Example:
-  proc.get(MIXER_RATE)
-"""
+    ini = ConfigParser.ConfigParser()
+    ini.read("config.ini")
+    port = ini.getint("General", "port")
+    hostname = ini.get("General", "hostname")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print "Connecting to %s:%d" % (hostname, port)
+    sock.connect((hostname, port))
+    print "Connected"
 
-IPython.embed(config=cfg, user_ns=namespace, banner2=banner)
+    namespace = {"tank" : BatchProcess(sock)}
+    banner = namespace["tank"].__doc__
+    banner += ("\nAn instance of the process have been started and is "
+               "available in your\nnamespace by the name 'tank'")
+
+    IPython.embed(config=cfg, user_ns=namespace, banner2=banner)
 

@@ -1,7 +1,7 @@
 %\documentclass{tufte-handout}
 \documentclass{article}
 \usepackage{amsmath,amsthm}
-%\usepackage{fontspec}
+\usepackage{fontspec}
 %\usepackage{unicode-math}
 %\setmathfont{Palatino Linotype}
 %\setmainfont{Palatino Linotype}
@@ -59,6 +59,7 @@ The data will be received and parsed by Javascript code which will go through it
 \section{Running the system}
 % A section describing the user interface in the project including a short
 % HowTo description on how to start and operate the program.
+To start the system one should first connect a device to the batch tank and the serial connection to a USB port using a serial to USB adapter. After connecting the device to the batch tank start the server named batchtank\_server and it will start listening for incoming TCP connections from clients. Run these on either the same device as the server or on separate devices connected, via TCP/IP, to the server.
 
 \section{Results}
 % A section containing the results. In case the project is a control-oriented

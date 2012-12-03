@@ -24,6 +24,9 @@
 \newpage
 \section{Problem description}
 % An introduction that states the problem that has been solved.
+This project aims to control a process called batchprocess that consists of a batchtank, two pumps (one for pumping into the tank and one to pump out of the tank), a heater, a cooler and a mixer. As stated in the project descriptions \cite[p.~6]{project12}, we should simultaneously control the level and temperature in the tank while simulating an exothermic chemical reaction.
+
+This means that the heater will simulate the exothermic reaction and we'll use the cooler and in pump to control the temperature. The out pump will then be used to control the level.
 
 \section{Program structure}
 % A section describing the main program structure, both from a class
@@ -48,12 +51,6 @@ The data will be received and parsed by Javascript code which will go through it
 
 \section{Control design}
 % A section describing the control design aspects of the project.
-\begin{description}
-\item[$m$] Building of color matrices
-\item[$2^n$] For all color combinations
-\item[$n^3$] Determinant calculation
-\item[$n^2$] Matrix addition/subtraction
-\end{description}
 
 
 \section{Running the system}
@@ -70,8 +67,6 @@ To start the system one should first connect a device to the batch tank and the 
 \section{Conclusion}
 % A conclusion section.
 
-Since the degree of the polynomial is at maximum n, by using Claim~2.1 in \cite[p.~2-1]{alistair} we get the bounded probability of less than $\frac{n}{p}$ where p is a previously fixed prime number.
-
 \newpage
 
 \begin{thebibliography}{9}
@@ -81,10 +76,8 @@ Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State
 \url{http://www.json.org}
 \bibitem{python}
 \url{http://python.org}
-\bibitem{alistair}
-\url{http://www.cs.berkeley.edu/~sinclair/cs271/n2.pdf}
-\bibitem{testset}
-\url{https://piazza.com/class#fall2012/edan55/50}
+\bibitem{project12}
+\url{http://www.control.lth.se/media/Education/EngineeringProgram/FRTN01/2012/projects12.pdf}
 \end{thebibliography}
 
 \end{document}

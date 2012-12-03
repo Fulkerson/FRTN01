@@ -39,6 +39,13 @@ The server contains of a driver that communicates with the batch tank over a ser
 \subsection{Server}
 
 \subsection{Driver}
+The driver for the communication over the serial port is written in the C language. It makes use of the Unix API for terminal I/O. The operative system's driver will map the serial device to a file descriptor, hence the reads and writes are done with standard C functions read(3), write(1), open(2) and close(2).  The serial connection has a speed of 115200 baud. 
+
+The driver has a set and get function and a couple of enumerators specifying the sensor to set or to get. The driver supports all available sensors or motors of the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
+
+The get function is blocking with a timeout of 1 second. Any kind of failure will make the functions return a negative number. Data is sent and received in chunks of 8 bits. The byte is processed in accordance to the source code found in cook/kokare.c line 150-223\cite{kokare.c} (the code that runs on the batch tank). 
+
+The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. 
 
 \subsection{PID client}
 
@@ -65,7 +72,7 @@ To start the system one should first connect a device to the batch tank and the 
 % this section could contain measurement results of different type.
 
 \section{Conclusion}
-% A conclusion section.
+% A conclusion section.\ref{kokare.c}. 
 
 \newpage
 
@@ -76,6 +83,8 @@ Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State
 \url{http://www.json.org}
 \bibitem{python}
 \url{http://python.org}
+\bibitem{kokare.c}
+\url{cook/kokare.c}
 \bibitem{project12}
 \url{http://www.control.lth.se/media/Education/EngineeringProgram/FRTN01/2012/projects12.pdf}
 \end{thebibliography}

@@ -11,7 +11,7 @@ export BIN_PATH
 export INCLUDE_PATH
 
 # Add your sub dirs here
-SUB_DIRS = pid_client sim_client
+SUB_DIRS = pid_client server
 
 all:
 	mkdir -p $(LIB_PATH)
@@ -26,5 +26,5 @@ clean:
 		cd $(PWD)/$$DIR && make clean && make uninstall; \
 	done
 	rmdir $(LIB_PATH) || return 0
-	rmdir $(BIN_PATH) || return 0 
+#	rmdir $(BIN_PATH) || return 0 
 	rmdir $(INCLUDE_PATH) || return 0

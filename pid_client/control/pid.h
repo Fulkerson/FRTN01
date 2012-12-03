@@ -14,7 +14,7 @@ public:
 	double umax;
 	bool inverted;
 	PIDParameters();
-	PIDParameters(double,double,double,double,int,double,double,double,bool);
+	PIDParameters(double,double,double,double,double,double,double,double,bool);
 
 	friend std::ostream& operator <<(std::ostream&, const PIDParameters&);
 };
@@ -24,6 +24,7 @@ class PID
 private:
 	double I, eo, u, v;
 	PIDParameters p;
+	double limit(double,double,double);
 public:
 	PID();
 	void updateParameters(const PIDParameters&);

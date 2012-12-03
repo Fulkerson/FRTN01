@@ -5,7 +5,15 @@ CXXFLAGS += -Wmissing-braces -Wparentheses
 LDLIBS = -lprotobuf -lboost_system -lboost_thread-mt -lrt
 PROTO_DIR = ../proto
 
+BIN_PATH?=../bin
+
 all: batchtank_server
+
+install: all
+	cp batchtank_server $(BIN_PATH) 
+
+uninstall:
+	rm -f $(BIN_PATH)/batchtank_server
 
 batchtank_server: batchtank_server.o batchtank.pb.o cook.o
 	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o cook.o $(LDLIBS) \

@@ -50,13 +50,20 @@ bool Parameters::update_parameters()
 				std::cerr << e.what() << std::endl;
 				try_again = true;
 			}
+			if (try_again) {
+				timespec t;
+
+				t.tv_sec = 0;
+				t.tv_nsec = 500000000;
+				clock_nanosleep(CLOCK_MONOTONIC, 0, &t, nullptr);
+			}
 		} while (try_again);
 		pp = PIDParameters(
 			     pt.get<double>("PID.K"),
 			     pt.get<double>("PID.Ti"),
 			     pt.get<double>("PID.Td"),
 			     pt.get<double>("PID.Tr"),
-				 period,
+				 (double) period,
 			     pt.get<double>("PID.ref"),
 			     pt.get<double>("PID.umin"),
 			     pt.get<double>("PID.umax"),
@@ -97,6 +104,7 @@ int main(int argc, char* argv[])
 	std::string ip(pt.get<std::string>("General.ipaddress"));
 	int port = pt.get<int>("General.port");
 	int period = pt.get<int>("General.period");
+	int delay = pt.get<int>("General.delay");
 
 	messages::Sensor sensor;
 
@@ -208,6 +216,10 @@ int main(int argc, char* argv[])
 
 			// Prepare for send
 			msg.Clear();
+
+
+			// Simulate delay
+			sleep((double)rand()/RAND_MAX*delay/1000);	
 
 			// Create control signal
 			messages::ControlSignal* sig = msg.add_signal();

@@ -13,17 +13,18 @@ int main(){
 	double level = 0;
 	double vin = 0;
 	double vout = 0;
-	double ref = 5;
-	int period = 50;
+	double ref = 500;
+	int period = 100;
 
-	PIDParameters pp(1,2,1,5,period,ref,0,10);
+	PIDParameters pp(1,2,1,0,period,ref,0,255,false);
 	PID pid;
 	pid.updateParameters(pp);
-	for (int i = 0; i < 5000; i++){
-		vin = 0.2 * pid.next(level);
+	std::cout << pp << "\n";
+	for (int i = 0; i < 7000; i++){
+		vin = 0.2* pid.next(level);
 		pid.updateStates();
 		vout = 0.1 * sqrt(2*9.82*level);
-		level = level + (vin - vout)*period/1000;
+		level = level + (vin - vout) * period/1000;
 		if (level < 0) level = 0;
 		std::cout << ref - level << "\n";
 	}

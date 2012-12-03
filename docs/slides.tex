@@ -112,41 +112,40 @@
             \item Sends and receives data in chunks of 8 bits, the data is raw.   
         \end{itemize}
     \end{column}
-    \end{columns}
+  \end{columns}
 \end{frame}
 
 %--- Slide 4 ---%
-\begin {frame}{Protocol - as seen in the batch tank source code}
-/*
-* +-+-+-+-+-+
-* |0|cmd| chan |
-* +-+-+-+-+-+
-*
-* 00 = bit clear, 01 = bit set, 10 = bit get, 11 = chan get
-*
-* +-+-+-+-+-+-+-+-+ +-+
-* |1| bit8...bit2 | |0|bit| chan |
-* +-+-+-+-+-+-+-+-+ +-+
-*
-* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+
-* |1|bit15...bit9 | |1| bit8...bit2 | |0|bit| chan |
-* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+
-*
-* ...
-*
-* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +
-* |1|bit31...bit30| |1|bit29...bit23| ... |0|bit| chan |
-* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +
-*
-*/
+\begin{frame}[fragile]
+    \frametitle{Protocol - as seen in the batch tank source code}
+        \small
+\begin{semiverbatim}
++-+-+-+-+-+-+-+-+
+|0|cmd|  chan   | 
++-+-+-+-+-+-+-+-+
+
+00 = bit clear, 01 = bit set, 10 = bit get, 11 = chan get
+
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+ 
+|1| bit8...bit2 |  |0|bit|  chan   |
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+ 
+
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+ 
+|1|bit15...bit9 |  |1| bit8...bit2 |  |0|bit|  chan   |
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+ 
+ 
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+     +-+-+-+-+-+-+-+-+ 
+|1|bit31...bit30|  |1|bit29...bit23| ... |0|bit|  chan   |
++-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+     +-+-+-+-+-+-+-+-+ 
+\end{semiverbatim}
 \end{frame}
+
 %--- Slide 5 ---%
 \begin{frame}{PID clients}
 \begin{columns}[T]
     \begin{column}{.55\textwidth}
         \begin{itemize}
-            \item A PID client receives measurement data from the server and calculates control data which then is sent to the server.
-            
+            \item A PID client receives measurement data from the server and calculates control data which then is sent to the server.            
         \end{itemize}
     \end{column}
     \end{columns}

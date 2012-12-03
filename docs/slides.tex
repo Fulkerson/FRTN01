@@ -113,4 +113,39 @@
     \end{columns}
 \end{frame}
 
+%--- Slide 4 ---%
+\begin{frame}{PID clients}
+\begin{columns}[T]
+    \begin{column}{.55\textwidth}
+        \begin{itemize}
+            \item A PID client receives measurement data from the server and calculates control data which then is sent to the server.
+            
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+%--- Slide 5 ---%
+\begin{frame}{Plot client}
+\begin{columns}[T]
+    \begin{column}{.55\textwidth}
+        \begin{itemize}
+            \item A client that is a HTTP server.
+            \item Receives measurement data and control data from the server.
+            \item Listens for HTTP connections on port 8080.
+            \item Serves a HTML, CSS and Javascript based plotting system.
+            \item The plotting system sends AJAX GETs to the HTTP server which answers with the latest data.
+            \item Plots multiple curves on multiple plots.
+        \end{itemize}
+    \end{column}
+    \begin{column}{.45\textwidth}
+        \begin{figure}[H]
+           \centering
+           	Plot pic.
+  %         \includegraphics[width=0.7\textwidth]{batchprocess.jpg}
+        \end{figure}
+    \end{column}
+    \end{columns}
+\end{frame}
+
 \end{document}

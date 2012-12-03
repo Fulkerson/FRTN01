@@ -50,6 +50,13 @@ bool Parameters::update_parameters()
 				std::cerr << e.what() << std::endl;
 				try_again = true;
 			}
+			if (try_again) {
+				timespec t;
+
+				t.tv_sec = 0;
+				t.tv_nsec = 500000000;
+				clock_nanosleep(CLOCK_MONOTONIC, 0, &t, nullptr);
+			}
 		} while (try_again);
 		pp = PIDParameters(
 			     pt.get<double>("PID.K"),

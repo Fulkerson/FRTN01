@@ -20,6 +20,15 @@ install: all
 uninstall:
 	rm -f $(BIN_PATH)/batchtank_server
 
+dummy_batchtank_server: dummy_batchtank_server.o batchtank.pb.o
+	$(CXX) $(CXXFLAGS) dummy_batchtank_server.o batchtank.pb.o \
+	       	$(LDLIBS) -o dummy_batchtank_server
+
+dummy_batchtank_server.o: batchtank_server.cc batchtank.pb.h \
+       dummy_cook.h ../common/message_utils.h
+	$(CXX) -c $(CXXFLAGS) -DDUMMY_PROCESS batchtank_server.cc \
+	       	-o dummy_batchtank_server.o
+
 batchtank_server: batchtank_server.o batchtank.pb.o cook.o
 	$(CXX) $(CXXFLAGS) batchtank_server.o batchtank.pb.o cook.o $(LDLIBS) \
 		-o batchtank_server
@@ -39,7 +48,7 @@ batchtank.pb.cc: $(PROTO_DIR)/batchtank.proto
 	protoc -I=$(PROTO_DIR) $(PROTO_DIR)/batchtank.proto --cpp_out=.
 
 clean:
-	rm -rf batchtank_server *.o
+	rm -rf batchtank_server dummy_batchtank_server *.o
 
 protoclean: clean
 	rm -rf batchtank.pb.h batchtank.pb.cc

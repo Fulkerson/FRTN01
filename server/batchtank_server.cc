@@ -19,9 +19,14 @@
 #endif
 #endif
 
+#ifdef DUMMY_PROCESS
+#include "dummy_cook.h"
+#else
+#include "../cook/cook.h"
+#endif
+
 #include "batchtank_server.h"
 #include "../common/message_utils.h"
-#include "../cook/cook.h"
 
 /* Used to silence compiler when unused vars. */
 #define UNUSED(expr) if(0) { (void)(expr); }
@@ -461,7 +466,6 @@ class KeyboardInterupt: public std::exception {
 void
 got_signal(int)
 {
-    destroy();
     throw interrupt;
 }
 

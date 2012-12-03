@@ -35,7 +35,7 @@ class BatchProcess(object):
         Args:
             socket -- socket ready for transceiving
         """
-        self.sock = socket
+        self._sock = socket
 
     @property
     def mixer(self):
@@ -95,17 +95,15 @@ class BatchProcess(object):
         sig.ref = value
         sig.value = value
         sig.type = output
-        print bm
-        return None
-        bm.SerializeToSocket(self.sock)
+        bm.SerializeToSocket(self._sock)
 
     def _get(self, sensor):
         bm = batchtank.BaseMessage()
         bm.getSensor.append(sensor)
 
-        bm.SerializeToSocket(self.sock)
+        bm.SerializeToSocket(self._sock)
         bm.Clear()
-        bm.ParseFromSocket(self.sock)
+        bm.ParseFromSocket(self._sock)
 
         return bm.sample[0].value
 

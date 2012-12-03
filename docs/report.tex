@@ -36,6 +36,13 @@ The server contains of a driver that communicates with the batch tank over a ser
 \subsection{Server}
 
 \subsection{Driver}
+The driver for the communication over the serial port is written in the C language. It makes use of the Unix API for terminal I/O. The operative system's driver will map the serial device to a file descriptor, hence the reads and writes are done with standard C functions read(3), write(1), open(2) and close(2).  The serial connection has a speed of 115200 baud. 
+
+The driver has a set and get function and a couple of enumerators specifying the sensor to set or to get. The driver supports all available sensors or motors of the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
+
+The get function is blocking with a timeout of 1 second. Any kind of failure will make the functions return a negative number. Data is sent and received in chunks of 8 bits. The byte is processed in accordance to the source code found in cook/kokare.c line 150-223\cite{kokare.c} (the code that runs on the batch tank). 
+
+The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. 
 
 \subsection{PID client}
 
@@ -47,7 +54,7 @@ The plot client, written in Python \cite{python}, is in itself a server/client s
 The data will be received and parsed by Javascript code which will go through it step by step. First, it checks if a plot exists, if not it is created, and then if the curves exists in the plot, if not they are created, and then shifts in the y values onto the curve data. The curve data will initially contain 100 zeros onto which the curve data is shifted from the right. The same amount of data is shifted out from the left so that the curve always contains 100 data points. This will create an effect where the data flows from the right to the left smoothly.
 
 \section{Control design}
-% A section describing the control design aspects of the project.
+% A section describing the control design aspects of the p\ref{kokare.c}. roject.
 \begin{description}
 \item[$m$] Building of color matrices
 \item[$2^n$] For all color combinations
@@ -67,7 +74,7 @@ The data will be received and parsed by Javascript code which will go through it
 % this section could contain measurement results of different type.
 
 \section{Conclusion}
-% A conclusion section.
+% A conclusion section.\ref{kokare.c}. 
 
 Since the degree of the polynomial is at maximum n, by using Claim~2.1 in \cite[p.~2-1]{alistair} we get the bounded probability of less than $\frac{n}{p}$ where p is a previously fixed prime number.
 
@@ -84,6 +91,8 @@ Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State
 \url{http://www.cs.berkeley.edu/~sinclair/cs271/n2.pdf}
 \bibitem{testset}
 \url{https://piazza.com/class#fall2012/edan55/50}
+\bibitem{kokare.c}
+\url{cook/kokare.c}
 \end{thebibliography}
 
 \end{document}

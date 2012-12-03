@@ -40,10 +40,9 @@ The driver for the communication over a serial port is written in the C language
 
 The driver has a set and get function and a couple of enumerators specifying the sensor to set or to get. The driver supports all available sensors or motors of the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
 
-The get function is blocking with a timeout of 1 second. Any kind of failure will make the functions return a negative number. Data is sent and received in chunks of 8 bits. The bytes is processed in accordance to the source code that runs on the batch tank \cite[line 150-223]{kokare.c}.
+The get function is blocking with a timeout of 1 second. Any kind of failure will make the functions return a negative number. Data is sent and received in chunks of 8 bits. The get function sends a byte asking the batch tank to send some information about a specific sensor or motor, it then blocks on the read function untill all bytes are read. The set function simply puts commands on the serial line. The bytes are processed in accordance to the source code that runs on the batch tank \cite[line 150-223]{kokare.c}. 
 
-The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. 
-
+The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. This is all supported. The driver is not thread safe.
 \subsection{PID client}
 
 \subsection{Plot client}

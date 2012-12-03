@@ -107,13 +107,40 @@
     \begin{column}{.55\textwidth}
         \begin{itemize}
             \item Driver for communicating with the batchprocess over a serial interface.
-            
+            \item Uses the Unix API termios.
+            \item Uses standard C functions for I/O; read(2), write(3), open(2), close(2).
+            \item Sends and receives data in chunks of 8 bits, the data is raw.   
         \end{itemize}
     \end{column}
     \end{columns}
 \end{frame}
 
 %--- Slide 4 ---%
+\begin {frame}{Protocol - as seen in the batch tank source code}
+/*
+* +-+-+-+-+-+
+* |0|cmd| chan |
+* +-+-+-+-+-+
+*
+* 00 = bit clear, 01 = bit set, 10 = bit get, 11 = chan get
+*
+* +-+-+-+-+-+-+-+-+ +-+
+* |1| bit8...bit2 | |0|bit| chan |
+* +-+-+-+-+-+-+-+-+ +-+
+*
+* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+
+* |1|bit15...bit9 | |1| bit8...bit2 | |0|bit| chan |
+* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+
+*
+* ...
+*
+* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +
+* |1|bit31...bit30| |1|bit29...bit23| ... |0|bit| chan |
+* +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +
+*
+*/
+\end{frame}
+%--- Slide 5 ---%
 \begin{frame}{PID clients}
 \begin{columns}[T]
     \begin{column}{.55\textwidth}
@@ -125,7 +152,7 @@
     \end{columns}
 \end{frame}
 
-%--- Slide 5 ---%
+%--- Slide 6 ---%
 \begin{frame}{Plot client}
 \begin{columns}[T]
     \begin{column}{.55\textwidth}

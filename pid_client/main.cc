@@ -104,6 +104,7 @@ int main(int argc, char* argv[])
 	std::string ip(pt.get<std::string>("General.ipaddress"));
 	int port = pt.get<int>("General.port");
 	int period = pt.get<int>("General.period");
+	int delay = pt.get<int>("General.delay");
 
 	messages::Sensor sensor;
 
@@ -215,6 +216,10 @@ int main(int argc, char* argv[])
 
 			// Prepare for send
 			msg.Clear();
+
+
+			// Simulate delay
+			sleep((double)rand()/RAND_MAX*delay/1000);	
 
 			// Create control signal
 			messages::ControlSignal* sig = msg.add_signal();

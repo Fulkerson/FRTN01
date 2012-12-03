@@ -11,7 +11,7 @@ export BIN_PATH
 export INCLUDE_PATH
 
 # Add your sub dirs here
-SUB_DIRS = pid_client sim_client server
+SUB_DIRS = pid_client server
 
 all:
 	mkdir -p $(LIB_PATH)

@@ -1,7 +1,7 @@
 %\documentclass{tufte-handout}
 \documentclass{article}
 \usepackage{amsmath,amsthm}
-%\usepackage{fontspec}
+\usepackage{fontspec}
 %\usepackage{unicode-math}
 %\setmathfont{Palatino Linotype}
 %\setmainfont{Palatino Linotype}
@@ -33,7 +33,57 @@ This project is designed as a two-tier client/server system \cite[p.~6]{clientse
 
 The server contains of a driver that communicates with the batch tank over a serial interface and the server part of the server that receives connections from clients and serves them with desired data and redirects control signals from clients to the driver which sends them to the batch tank. The communication between the server and its clients is done via the TCP/IP protocol which means that the clients can be located anywhere. In our tests we have had clients running on the same device as the server and on separate devices connected through a switch and TP-cable.
 
+\subsubsection{Protocol Buffers}
+The messages used to communicate between clients and the servers are
+described using a interface description language called Protocol
+buffers, or protobuf.
+
 \subsection{Server}
+The server is implemented using C++ in order to run well on the Raspberry Pi as
+there is currently not any acceptable JVM with proper JIT available. It
+also makes calling timing functions more appropriate for real time tanks
+considerably easier. The server consists of the following classes:
+
+\begin{description}
+\item[IORegistry]
+  This class is used as an interface against the batchtank server.
+  Mutexes are used in order to make reading and writing to the process
+  atomic operations.
+
+\item[ConnectionThread]
+  Whenever a connection is made to the server a \verb+ConnectionThread+
+  is fired and given control over that particular connection. Each
+  connection contains a main reading loop executing controller events.
+  It is running as a detached thread.
+
+\item[PeriodicTask]
+  Executes a function on a strictly regular basis. Uses
+  \verb+clock_nanosleep+  with \verb+TIMER_ABSTIME+ and
+  \verb+CLOCK_MONOTONIC+ and should have a fairly high resolution.
+
+\item[Sampler]
+  Ran as periodic task to sample at specified intervals.
+\end{description}
+
+\subsubsection{Use scenario}
+The server listens to a port specified in a \verb+.ini+ file. When a client
+connects the connection is assigned a dedicated \verb+ConnectionThread+. 
+Upon a register event recieved a \verb+PeriodicTask+ is fired together
+with a sampler that samples and sends samples to the client at a regular
+interval. The register message contains data such as period time and
+what sensors to read.
+
+The client may respond with control signal events which specify what
+value should be set as well as to what output. It also contains the
+reference value used for this control signal.
+
+Setting and getting values from the batch process is protected by a
+\verb+IORegistry+ however locking of the registry is external, i.e. it
+contains a public mutex and does no locking on its own. This is done in
+order to enable batching several gets and sets as single atomic
+operations. The \verb+IORegistry+ also contains copies of reference
+values as well as control signals for plotting use cases.
+
 
 \subsection{Driver}
 The driver for the communication over a serial port is written in the C language. It makes use of the Unix API for terminal I/O. The operative system's driver will map the serial device to a file descriptor, hence the reads and writes are done with standard C functions read(3), write(1), open(2) and close(2).  The serial connection has a speed of 115200 baud. 

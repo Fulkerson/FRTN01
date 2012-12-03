@@ -46,9 +46,6 @@ enable batching several gets and sets as single atomic operations.
 The IORegistry also contains copies of reference values as well as
 control signals for plotting use cases.
 
-Since calls to the process are fairly slow a polling thread updates the
-IORegistry monitor on a periodic basis.
-
 
 Design choices
 --------------

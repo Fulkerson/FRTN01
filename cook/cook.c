@@ -6,6 +6,7 @@
 #include <stdlib.h> 
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <sys/times.h>
 #include <sys/time.h>
@@ -23,7 +24,8 @@ static int fd = -1;
 
 int init(const char* path)
 {
-	struct termios  config = { 0 };
+	struct termios config;
+	memset(&config, 0, sizeof config);
 
 	fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
 	fcntl(fd, F_SETFL, 0);

@@ -127,11 +127,19 @@ IORegistry::getSensor(messages::SensorType type)
     switch(type) {
         case messages::TEMP:
             std::cout << "TEMP: ";
+#ifdef POLLING_UPDATE
             value = temp;
+#else
+            value = get(TEMP);
+#endif
             break;
         case messages::LEVEL:
             std::cout << "LEVEL: ";
+#ifdef POLLING_UPDATE
             value = level;
+#else
+            value = get(LEVEL);
+#endif
             break;
         case messages::IN_PUMP_RATE:
             std::cout << "IN_PUMP_RATE: ";
@@ -237,6 +245,7 @@ Sampler::operator()()
 }
 
 
+#ifdef POLLING_UPDATE
 Poller::Poller(IORegistry& ioreg) : ioreg(ioreg)
 {}
 
@@ -256,6 +265,7 @@ Poller::operator()()
         ioreg.setLevel(level);
     }
 }
+#endif
 
 PeriodicTask::PeriodicTask(int32_t period, std::function<void()> task) :
     period(period), task(task){}
@@ -474,15 +484,17 @@ main()
         boost::property_tree::ini_parser::read_ini(config, pt);
 
         int listenport = pt.get<int>("General.listenport");
-        int polltime = pt.get<int>("General.pollingtime");
 	std::string tty(pt.get<std::string>("General.serialport"));
+
 
         /* IO monitor for batchtank process */
         IORegistry ioreg(tty);
 
+#ifdef POLLING_UPDATE
+        int polltime = pt.get<int>("General.pollingtime");
         PeriodicTask poller(polltime, Poller(ioreg));
         poller.start();
-
+#endif
 
         boost::asio::io_service io_service;
         tcp::endpoint endpoint(tcp::v4(), listenport);

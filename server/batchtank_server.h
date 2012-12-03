@@ -112,6 +112,7 @@ class Sampler {
         boost::mutex& write_mutex;
 };
 
+#ifdef POLLING_UPDATE
 /* Function object used for polling the process */
 class Poller {
     public:
@@ -120,6 +121,7 @@ class Poller {
     private:
         IORegistry& ioreg;
 };
+#endif
 
 }
 

@@ -1,7 +1,12 @@
 CXXFLAGS += -std=c++0x -pipe -O0 -g -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
+
 # Uncomment below line for raspbian. Hard float is faster.
 #CXXFLAGS += -mfloat-abi=hard
+
+# Uncomment below line for periodic polling of the process to be used.
+#CXXFLAGS += -DPOLLING_UPDATE
+
 LDLIBS = -lprotobuf -lboost_system -lboost_thread-mt -lrt
 PROTO_DIR = ../proto
 

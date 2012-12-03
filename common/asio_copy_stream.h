@@ -94,6 +94,9 @@ AsioOutputStream<SyncWriteStream>::Write(const void* buffer, int size)
 
 #ifdef DEBUG_UTILS_H
     std::cout << " of which " << bytes_written << " was written." << std::endl;
+#else 
+    /* Supress unused variable warning */
+    (void)bytes_written;
 #endif
 
     return !ec;

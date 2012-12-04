@@ -201,7 +201,7 @@ start listening for incoming TCP connections from clients. Run these on either
 the same device as the server or on separate devices connected, via TCP/IP, to
 the server.
 
-\section{Results}
+\section{Results}\label{results}
 % A section containing the results. In case the project is a control-oriented
 % project this should include plots of measurement signals, reference sig-
 % nal, and control signal. If the project is more of a real-time nature then
@@ -227,13 +227,11 @@ and the bottom curve is the control value which is sent to the out pump.
 When running the server and a HTTP client (serving the plot system) on a
 Raspberry Pi serving plots to two clients and having one manual control client
 and one PID client the system use was about 3 \% CPU usage by the server and 
-about 30 \% CPU usage by the HTTP server. This indicates that there is no need of
-having the system spread out over multiple devices even if the system is
-designed to be spread out over multiple devices.
-
+about 30 \% CPU usage by the HTTP server.
 
 \section{Conclusion}
 % A conclusion section.\ref{kokare.c}. 
+The CPU usage shown in section \ref{results} Results indicates that there is no need of having the system spread out over multiple devices even if the system is designed to be spread out over multiple devices.
 
 \newpage
 

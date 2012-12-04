@@ -214,12 +214,22 @@ level measurements and can be seen in figure~\ref{fig:out pump}.
 The high frequency noise does not affect the pumping power so much as they can not make such small and frequent changes in power.
 
 Figure~\ref{fig:out pump} shows how a PID client controlling the out pump reacts
-to a change in the in flow of water. The straight curve at 400 (y value) is the reference water level the out pump should hold, the top curve is the water level and the bottom curve is the control value which is sent to the out pump.
+to a change in the in flow of water. The straight curve at 400 (y value) is the
+reference water level the out pump should hold, the top curve is the water level
+and the bottom curve is the control value which is sent to the out pump.
+
 \begin{figure}[H]
 \includegraphics[width=1.0\textwidth]{plot1.png}
 \caption{A PID client regulating the water level with the out pump with reference value 400.}
 \label{fig:out pump}
 \end{figure}
+
+When running the server and a HTTP client (serving the plot system) on a
+Raspberry Pi serving plots to two clients and having one manual control client
+and one PID client the system use was about 3 \% CPU usage by the server and 
+about 30 \% CPU usage by the HTTP server. This indicates that there is no need of
+having the system spread out over multiple devices even if the system is
+designed to be spread out over multiple devices.
 
 
 \section{Conclusion}

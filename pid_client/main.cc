@@ -90,9 +90,16 @@ int main(int argc, char* argv[])
 		std::cerr << "No implicit name given on cmdline" << std::endl;
 		return 1;
 	}
-	// Use executablename.ini as config
-	std::string config(argv[0]);
-	config += ".ini";
+
+	std::string config;
+	if (argc == 2) {
+		// Config given on commandline
+		config = argv[1];
+	} else {
+		// Use executablename.ini as config
+		config = argv[0];
+		config += ".ini";
+	}
 
 	// Parse config file
 	boost::property_tree::ptree pt;

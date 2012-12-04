@@ -103,21 +103,17 @@
 
 %--- Slide 3 ---%
 \begin{frame}{Driver}
-\begin{columns}[T]
-    \begin{column}{.55\textwidth}
         \begin{itemize}
             \item Driver for communicating with the batchprocess over a serial interface.
             \item Uses the Unix API termios.
             \item Uses standard C functions for I/O; read(2), write(3), open(2), close(2).
             \item Sends and receives data in chunks of 8 bits, the data is raw.   
         \end{itemize}
-    \end{column}
-  \end{columns}
 \end{frame}
 
 %--- Slide 4 ---%
 \begin{frame}[fragile]
-    \frametitle{Protocol - as seen in the batch tank source code}
+    \frametitle{Protocol - as seen in the source code of the batch tank}
         \small
 \begin{semiverbatim}
 +-+-+-+-+-+-+-+-+

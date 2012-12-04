@@ -24,14 +24,34 @@
 \newpage
 \section{Problem description}
 % An introduction that states the problem that has been solved.
+This project aims to control a process called batchprocess that consists of a
+batchtank, two pumps (one for pumping into the tank and one to pump out of the
+tank), a heater, a cooler and a mixer. As stated in the project descriptions
+\cite[p.~6]{project12}, we should simultaneously control the level and
+temperature in the tank while simulating an exothermic chemical reaction.
+
+This means that the heater will simulate the exothermic reaction and we'll use
+the in pump to control the temperature. The out pump will then be used
+to control the level which can be set dynamically in a settings file for the PID client that controls this pump.
+
+There are sensors on the batchprocess that measures the water level and temperature.
 
 \section{Program structure}
 % A section describing the main program structure, both from a class
 % and and a real-time perspective. If possible illustrate this with some
 % type of figure.
-This project is designed as a two-tier client/server system \cite[p.~6]{clientserver} where none of the control processes need to be directly connected to the batch tank.
+This project is designed as a two-tier client/server system 
+\cite[p.~6]{clientserver} where none of the control processes need to be directly
+connected to the batch tank.
 
-The server contains of a driver that communicates with the batch tank over a serial interface and the server part of the server that receives connections from clients and serves them with desired data and redirects control signals from clients to the driver which sends them to the batch tank. The communication between the server and its clients is done via the TCP/IP protocol which means that the clients can be located anywhere. In our tests we have had clients running on the same device as the server and on separate devices connected through a switch and TP-cable.
+The server contains of a driver that communicates with the batch tank over a
+serial interface and the server part of the server that receives connections from
+clients and serves them with desired data and redirects control signals from
+clients to the driver which sends them to the batch tank. The communication
+between the server and its clients is done via the TCP/IP protocol which means
+that the clients can be located anywhere. In our tests we have had clients
+running on the same device as the server and on separate devices connected
+through a switch and TP-cable.
 
 \subsubsection{External libraries}
 \begin{itemize}
@@ -41,7 +61,7 @@ The server contains of a driver that communicates with the batch tank over a ser
 \subsubsection{Protocol Buffers}
 The messages used to communicate between clients and the servers are
 described using a interface description language called Protocol
-buffers, or protobuf.
+buffers, or protobuf \cite{protobuf}.
 
 
 \subsection{Server}
@@ -92,11 +112,28 @@ values as well as control signals for plotting use cases.
 
 
 \subsection{Driver}
-The driver for the communication over a serial port is written in the C language. It makes use of the Unix API for terminal I/O. The operative system's driver will map the serial device to a file descriptor, hence the reads and writes are done with standard C functions read(3), write(1), open(2) and close(2).  The serial connection has a speed of 115200 baud. 
+The driver for the communication over a serial port is written in the C language.
+It makes use of the Unix API for terminal I/O. The operative system's driver will
+map the serial device to a file descriptor, hence the reads and writes are done
+with standard C functions read(3), write(1), open(2) and close(2).  The serial
+connection has a speed of 115200 baud. 
 
-The driver has a set and get function and a couple of enumerators specifying the sensor to set or to get. The driver supports all available sensors or motors of the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
+The driver has a set and get function and a couple of enumerators specifying the
+sensor to set or to get. The driver supports all available sensors or motors of
+the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
 
-The get function is blocking with a timeout of 1 second. Any kind of failure will make the functions return a negative number. Data is sent and received in chunks of 8 bits. The get function sends a byte asking the batch tank to send some information about a specific sensor or motor, it then blocks on the read function untill all bytes are read. The set function simply puts commands on the serial line. The bytes are processed in accordance to the source code that runs on the batch tank \cite[line 150-223]{kokare.c}. 
+The get function is blocking with a timeout of 1 second. Any kind of failure will
+make the functions return a negative number. Data is sent and received in chunks
+of 8 bits. The get function sends a byte asking the batch tank to send some
+information about a specific sensor or motor, it then blocks on the read function
+until all bytes are read. The set function simply puts commands on the serial
+line. The bytes are processed in accordance to the source code that runs on the
+batch tank \cite[line 150-223]{kokare.c}. 
+
+The driver will always parse the whole value into bytes and then send it to the
+batch tank. The batch tank only supports values between 0 and 255. The
+temperature and the water level sensors may gerenrate greater values than 255.
+This is all supported. The driver is not thread safe.
 
 The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. This is all supported. The driver is not thread safe.
 
@@ -115,11 +152,26 @@ The client starts with parsing server and controller details from a \verb+.ini+ 
 
 
 \subsection{Plot client}
-The plot client, written in Python \cite{python}, is in itself a server/client system where the server is a client to the main server and the clients are web browsers running the Javascript plotting code. When started, a HTTP server will start serving a HTML and Javascript page which is to be run in a browser. This page will request new data to plot from the HTTP server which then requests data from the main server. The main server then sends data (such as water level, control signals and reference signals) to the HTTP server which parses it into JSON \cite{json} formatted data and sends it to the plot page. The data format is as follows:
+The plot client, written in Python \cite{python}, is in itself a server/client
+system where the server is a client to the main server and the clients are web
+browsers running the Javascript plotting code. When started, a HTTP server will
+start serving a HTML and Javascript page which is to be run in a browser. This
+page will request new data to plot from the HTTP server which then requests data
+from the main server. The main server then sends data (such as water level,
+control signals and reference signals) to the HTTP server which parses it into
+JSON \cite{json} formatted data and sends it to the plot page. The data format is
+as follows:
 \begin{verbatim}
 {"Plot name": { "Curve name": [y value, ...], ... }, ... }
 \end{verbatim}
-The data will be received and parsed by Javascript code which will go through it step by step. First, it checks if a plot exists, if not it is created, and then if the curves exists in the plot, if not they are created, and then shifts in the y values onto the curve data. The curve data will initially contain 100 zeros onto which the curve data is shifted from the right. The same amount of data is shifted out from the left so that the curve always contains 100 data points. This will create an effect where the data flows from the right to the left smoothly.
+The data will be received and parsed by Javascript code which will go through it
+step by step. First, the code checks if a plot exists and creates the plot if
+not. Then if the curves exists in the plot and creates them if not. Then each y
+value will be shifted onto the curve data, from the right. This data will
+initially contain 100 zeros. The same amount of data that is shifted from the
+right is shifted out from the left so that the curve always contains 100
+data points. This will create an effect where the data flows from the right to
+the left smoothly.
 
 \section{Control design}
 % A section describing the control design aspects of the p\ref{kokare.c}. roject.
@@ -137,6 +189,12 @@ The control loop does the following in one iteration.
 \section{Running the system}
 % A section describing the user interface in the project including a short
 % HowTo description on how to start and operate the program.
+To start the system one should first connect a device to the batch tank and the
+serial connection to a USB port using a serial to USB adapter. After connecting
+the device to the batch tank start the server named batchtank\_server and it will
+start listening for incoming TCP connections from clients. Run these on either
+the same device as the server or on separate devices connected, via TCP/IP, to
+the server.
 
 \section{Results}
 % A section containing the results. In case the project is a control-oriented
@@ -147,8 +205,6 @@ The control loop does the following in one iteration.
 \section{Conclusion}
 % A conclusion section.\ref{kokare.c}. 
 
-Since the degree of the polynomial is at maximum n, by using Claim~2.1 in \cite[p.~2-1]{alistair} we get the bounded probability of less than $\frac{n}{p}$ where p is a previously fixed prime number.
-
 \newpage
 
 \begin{thebibliography}{9}
@@ -158,12 +214,12 @@ Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State
 \url{http://www.json.org}
 \bibitem{python}
 \url{http://python.org}
-\bibitem{alistair}
-\url{http://www.cs.berkeley.edu/~sinclair/cs271/n2.pdf}
-\bibitem{testset}
-\url{https://piazza.com/class#fall2012/edan55/50}
+\bibitem{project12}
+\url{http://www.control.lth.se/media/Education/EngineeringProgram/FRTN01/2012/projects12.pdf}
 \bibitem{kokare.c}
-\url{cook/kokare.c} line 150-223
+\url{cook/kokare.c}
+\bibitem{protobuf}
+\url{http://code.google.com/p/protobuf}
 \end{thebibliography}
 
 \end{document}

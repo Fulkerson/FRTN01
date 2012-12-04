@@ -17,7 +17,7 @@ double sec(void)
 
         gettimeofday(&time, NULL);
 
-	return  time.tv_usec;
+	return (time.tv_sec*1000000 + (time.tv_usec));
 }
 
 int main(void)
@@ -55,6 +55,23 @@ int main(void)
 	while (EOF != (c = getchar())) {
 		switch (c) {
 			case 'w':
+				#define RUNS 	(10000)
+				printf("GET TEST:\n");
+				begin = sec();
+				for (int i = 0; i < RUNS; i+=1) {
+					get(TEMP);
+				}
+				end = sec();
+				printf("time on %d runs is average %lf\n", RUNS, (end - begin)/RUNS);
+
+				printf("SET TEST:\n");
+
+				begin = sec();
+				for (int i = 0; i < RUNS; i+=1) {
+					set(COOLER_RATE, 40);
+				}
+				end = sec();
+				printf("time on %d runs is average %lf\n", RUNS, (end - begin)/RUNS);
 				break;
 			case 'f':
 				for (int i = 0; i < 10000; i+=1) {

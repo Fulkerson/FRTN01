@@ -53,10 +53,17 @@ that the clients can be located anywhere. In our tests we have had clients
 running on the same device as the server and on separate devices connected
 through a switch and TP-cable.
 
+\subsubsection{External libraries}
+\begin{itemize}
+\item{jQuery}
+\item{Flot}
+\end{itemize}
+
 \subsubsection{Protocol Buffers}
 The messages used to communicate between clients and the servers are
 described using a interface description language called Protocol
 buffers, or protobuf \cite{protobuf}.
+
 
 \subsection{Server}
 The server is implemented using C++ in order to run well on the Raspberry Pi as
@@ -129,7 +136,24 @@ batch tank. The batch tank only supports values between 0 and 255. The
 temperature and the water level sensors may gerenrate greater values than 255.
 This is all supported. The driver is not thread safe.
 
+The driver will always parse the whole value into bytes and then send it to the
+batch tank. The batch tank only supports values between 0 and 255. The
+temperature and the water level sensors may gerenrate greater values than 255.
+This is all supported. The driver is not thread safe.
+
 \subsection{PID client}
+The PID client, written in C++, consists of a main method which uses boost libraries for communication with the server and a PID class. The PID class have these public members:
+\begin{itemize}
+\item{void updateParameters(const PIDParameters\&);}
+\item{double next(double);}
+\item{void updateStates();}
+\end{itemize}
+
+The PID parameters include K, Ti, Td, Tr, ref, umin, umax, inverted, and period.
+
+\subsubsection{Use scenario}
+The client starts with parsing server and controller details from a \verb+.ini+ file. After a succesful connection it sends sensor and period to the server and starts to wait for sensor values. When one is received a control signal is calculated and sent. Then controller states are updated and the client starts to wait for the next sensor value. The client also updates the PID parameters as they are changed in the \verb+.ini+ file.
+
 
 \subsection{Plot client}
 The plot client, written in Python \cite{python}, is in itself a server/client
@@ -155,6 +179,16 @@ the left smoothly.
 
 \section{Control design}
 % A section describing the control design aspects of the p\ref{kokare.c}. roject.
+The controller is a standard PID controller implemented with forward approximation integral, forward approximation derivative, bumpless transfer, and tracking as anti-windup.
+
+The control loop does the following in one iteration.
+\begin{itemize}
+\item{Wait for y}
+\item{Calculate u}
+\item{Send u}
+\item{Update states}
+\end{itemize}
+
 
 \section{Running the system}
 % A section describing the user interface in the project including a short

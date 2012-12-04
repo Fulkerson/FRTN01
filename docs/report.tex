@@ -136,7 +136,10 @@ batch tank. The batch tank only supports values between 0 and 255. The
 temperature and the water level sensors may gerenrate greater values than 255.
 This is all supported. The driver is not thread safe.
 
-The driver will always parse the whole value into bytes and then send it to the batch tank. The batch tank only supports values between 0 and 255. The temperature and the water level sensors may gerenrate greater values than 255. This is all supported. The driver is not thread safe.
+The driver will always parse the whole value into bytes and then send it to the
+batch tank. The batch tank only supports values between 0 and 255. The
+temperature and the water level sensors may gerenrate greater values than 255.
+This is all supported. The driver is not thread safe.
 
 \subsection{PID client}
 The PID client, written in C++, consists of a main method which uses boost libraries for communication with the server and a PID class. The PID class have these public members:

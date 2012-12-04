@@ -128,10 +128,8 @@ IORegistry::getSensor(messages::SensorType type)
 {
     int32_t value = 0;
 
-    std::cout << "GET ";
     switch(type) {
         case messages::TEMP:
-            std::cout << "TEMP: ";
 #ifdef POLLING_UPDATE
             value = temp;
 #else
@@ -139,7 +137,6 @@ IORegistry::getSensor(messages::SensorType type)
 #endif
             break;
         case messages::LEVEL:
-            std::cout << "LEVEL: ";
 #ifdef POLLING_UPDATE
             value = level;
 #else
@@ -147,62 +144,48 @@ IORegistry::getSensor(messages::SensorType type)
 #endif
             break;
         case messages::IN_PUMP_RATE:
-            std::cout << "IN_PUMP_RATE: ";
             value = in_pump;
             break;
         case messages::OUT_PUMP_RATE:
-            std::cout << "OUT_PUMP_RATE: ";
             value = out_pump;
             break;
         case messages::HEATER_RATE:
-            std::cout << "HEATER_RATE: ";
             value = heater;
             break;
         case messages::MIXER_RATE:
-            std::cout << "MIXER_RATE: ";
             value = mixer;
             break;
         case messages::COOLER_RATE:
-            std::cout << "COOLER_RATE: ";
             value = cooler;
             break;
         default:
             std::cerr << "Got something unexpected." << std::endl;
             throw get_error;
     }
-
-    std::cout << value << std::endl;
-
-    return value;
+	return value;
 }
 
 void
 IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
 {
-    std::cout << "SET ";
     switch(type) {
         case messages::HEATER:
-            std::cout << "HEATER: ";
             heater = value;
             heater_ref = ref;
             break;
         case messages::COOLER:
-            std::cout << "COOLER: ";
             cooler = value;
             cooler_ref = ref;
             break;
         case messages::IN_PUMP:
-            std::cout << "IN_PUMP: ";
             in_pump = value;
             in_pump_ref = ref;
             break;
         case messages::OUT_PUMP:
-            std::cout << "OUT_PUMP: ";
             out_pump = value;
             out_pump_ref = ref;
             break;
         case messages::MIXER:
-            std::cout << "MIXER: ";
             mixer = value;
             mixer_ref = ref;
             break;
@@ -210,7 +193,6 @@ IORegistry::setOutput(messages::OutputType type, int32_t value, int32_t ref)
             std::cerr << "Got something unexpected." << std::endl;
             throw set_error;
     }
-    std::cout << value << std::endl;
 
     if (set((enum set_target) type, value) < 0) {
         throw set_error;

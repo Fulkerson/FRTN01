@@ -32,7 +32,9 @@ temperature in the tank while simulating an exothermic chemical reaction.
 
 This means that the heater will simulate the exothermic reaction and we'll use
 the in pump to control the temperature. The out pump will then be used
-to control the level.
+to control the level which can be set dynamically in a settings file for the PID client that controls this pump.
+
+There are sensors on the batchprocess that measures the water level and temperature.
 
 \section{Program structure}
 % A section describing the main program structure, both from a class
@@ -126,6 +128,7 @@ The driver will always parse the whole value into bytes and then send it to the
 batch tank. The batch tank only supports values between 0 and 255. The
 temperature and the water level sensors may gerenrate greater values than 255.
 This is all supported. The driver is not thread safe.
+
 \subsection{PID client}
 
 \subsection{Plot client}

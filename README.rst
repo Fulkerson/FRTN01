@@ -15,9 +15,6 @@ batchtank_server
   TCP server used for reading and writing to the actual process. Resides
   in the `server` directiory.
 
-control
-  Library containing control things. At the moment only a PID regulator.
-
-client
-  Client which connects to the server and regulates using the PID in control.
+pid_client
+  Client which connects to the server and regulates using a PID.
  

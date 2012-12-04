@@ -1,7 +1,6 @@
 
 #include <string>
-#include <ctime>
-#include <sys/stat.h>
+#include <csignal>
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -16,6 +15,13 @@ namespace messages = batchtank_messages;
 }
 
 using namespace batchtank;
+static bool do_update = true;
+
+/* Set update */
+void got_signal(int)
+{
+	do_update = true;
+}
 
 class Parameters
 {
@@ -38,26 +44,8 @@ private:
 bool Parameters::update_parameters()
 {
 	// Check when .ini was last modified.
-	struct stat attr;
-	stat(config.c_str(), &attr);
-	if (attr.st_mtime > last_change) {
-		bool try_again;
-		do {
-			try {
-				boost::property_tree::ini_parser::read_ini(config, pt);
-				try_again = false;
-			} catch (std::exception& e)  {
-				std::cerr << e.what() << std::endl;
-				try_again = true;
-			}
-			if (try_again) {
-				timespec t;
-
-				t.tv_sec = 0;
-				t.tv_nsec = 500000000;
-				clock_nanosleep(CLOCK_MONOTONIC, 0, &t, nullptr);
-			}
-		} while (try_again);
+	if (do_update) {
+		boost::property_tree::ini_parser::read_ini(config, pt);
 		pp = PIDParameters(
 			     pt.get<double>("PID.K"),
 			     pt.get<double>("PID.Ti"),
@@ -69,7 +57,7 @@ bool Parameters::update_parameters()
 			     pt.get<double>("PID.umax"),
 			     pt.get<bool>("PID.inverted")
 		     );
-		last_change = attr.st_mtime;
+		do_update = false;
 		return true;
 	} else {
 		return false;
@@ -88,6 +76,15 @@ Parameters::Parameters(std::string config, int period) :
 
 int main(int argc, char* argv[])
 {
+
+	/* Set user defined signal for updating parameters */
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(sa)); 
+	sa.sa_handler = got_signal;
+	sa.sa_flags = SA_RESTART;
+	sigfillset(&sa.sa_mask);
+	sigaction(SIGUSR1, &sa, NULL);
+
 	// In some uses argv[0] might not contain executable name.
 	if (argc < 1) {
 		std::cerr << "No implicit name given on cmdline" << std::endl;

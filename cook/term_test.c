@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "cook.h"
+#include <sys/times.h>
+#include <sys/time.h>
 
 void reset(int* target, int* val, int* se)
 {
@@ -9,12 +11,24 @@ void reset(int* target, int* val, int* se)
 	*se = -1;
 }
 
+double sec(void)
+{
+        struct timeval time;
+
+        gettimeofday(&time, NULL);
+
+	return  time.tv_usec;
+}
+
 int main(void)
 {
 	int	c;
 	int	se;
 	int 	target;
 	int	val;
+	int	gg;
+	double	begin;
+	double 	end;
 
 	printf("Init\n");
 	if (init("/dev/ttyUSB0") == -1) {
@@ -40,6 +54,8 @@ int main(void)
 	se = -1;
 	while (EOF != (c = getchar())) {
 		switch (c) {
+			case 'w':
+				break;
 			case 'f':
 				for (int i = 0; i < 10000; i+=1) {
 					set(COOLER, 255);
@@ -99,10 +115,17 @@ int main(void)
 				}
 				break;
 			case '\n':
-				if (se && target != -1) 
+				if (se && target != -1)  {
+					begin = sec();
 					set(target, val);
-				else if (target != -1) {
-					printf("%d\n", get(target));
+					end = sec();
+					printf("set-time in micro: %lf\n", end - begin);
+				} else if (target != -1) {
+					begin = sec();
+					gg = get(target);
+					end = sec();
+					printf("%d, get-time in micro: %lf\n", gg, end - begin);
+					
 				} else  {
 					fprintf(stderr, "bad input\n");
 					reset(&target, &val, &se);

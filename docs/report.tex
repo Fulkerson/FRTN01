@@ -5,7 +5,7 @@
 \usepackage{float}
 %\usepackage{unicode-math}
 %\setmathfont{Palatino Linotype}
-%\setmainfont{Palatino Linotype}
+\setmainfont{Palatino Linotype}
 %\usepackage{minted}
 %\usemintedstyle{bw}
 \usepackage{hyperref}
@@ -54,7 +54,37 @@ that the clients can be located anywhere. In our tests we have had clients
 running on the same device as the server and on separate devices connected
 through a switch and TP-cable.
 
-\subsubsection{External libraries}
+From a high level perspective the system is very similar to message
+passing \cite[p.~71]{rtcs}. The server listens for messages, each
+containing any number of the predifined events, and processes these as
+soon as possible.
+
+\subsection{Events}
+The following events are defined:
+
+\begin{description}
+\item[sample]
+  A client may listen for sample events and from this produce a control
+  signal. The sample message contain sensor type and the value of said
+  sample.
+\item[signal]
+  The server listens for (control) signal events and uses these to
+  control the batchtank process. A controlsignal message contains
+  information on output to be used and the value as well as the
+  reference value used to produce said signal.
+\item[register]
+  Upon receiving a register event, the server periodically samples the
+  process and sends these samples to the client. Inside a register
+  message period time and any numer of sensors are defined.
+\item[getSensor]
+  Used to tell the server to respond with samples for any number of
+  sensors right now, without any regard for periodtime and such.
+\item[getOutput]
+  Similar to getSensor but responds with the latest used control signal
+  (value and reference value) for specified output.
+\end{description}
+
+\subsection{External libraries}
 \begin{itemize}
 \item{jQuery}
 \item{Flot}
@@ -64,6 +94,20 @@ through a switch and TP-cable.
 The messages used to communicate between clients and the servers are
 described using a interface description language called Protocol
 buffers, or protobuf \cite{protobuf}.
+
+Messages are compiled into the language of choice resulting in a series
+of classes and packages used to create the messages which then can be
+serialized and sent over wire in binary format. It is designed for high
+performance and small serialized size. The official protocol buffers
+compiler is able to produce C++, Java and Python code. This project uses
+C++ and Python successfully.
+
+There are a few benefits to using Protocol Buffers over a hand written
+binary protocol, or a language native serializing protocol. Language
+native serialization requires using a specific language and is seldom as
+efficient in terms of message size and serializing speed. A custom
+binary protocol may require very large reworking of actual code in the
+case of late stage changes.
 
 
 \subsection{Server}
@@ -250,6 +294,9 @@ Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State
 \url{cook/kokare.c}
 \bibitem{protobuf}
 \url{http://code.google.com/p/protobuf}
+\bibitem{rtcs}
+Årzén, KE. (2012) \emph{Real-Time Control Systems}, Department of
+Automatic Control, Lund University.
 \end{thebibliography}
 
 \end{document}

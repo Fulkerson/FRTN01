@@ -6,9 +6,9 @@ all: $(latexfile).pdf
 #failtable.tex:
 #	../src/failbench.py > failtable.tex
 
-$(latexfile).pdf : $(latexfile).tex vc.tex
-	while (xelatex -shell-escape $(latexfile).tex ; \
-	grep -q "Rerun to get cross" $(latexfile).log ) do true ; \
+$(latexfile).pdf : $(latexfile).tex vc.tex build_dir
+	while (xelatex -output-directory=build -shell-escape $(latexfile).tex 2> /dev/null ; \
+	grep -q "Rerun to get cross" build/$(latexfile).log ) do true ; \
 	done
 #	mkdir -p $(cpdir)
 #	cp $(latexfile).pdf $(cpdir)
@@ -22,6 +22,9 @@ vc.tex: ../.git/logs/HEAD
 		\\gdef\\GITDate{%ad}\
 		\\gdef\\GITAuthorName{%an}" >> vc.tex
 
+build_dir:
+	mkdir -p build
+
 clean:
-	rm -rf $(latexfile).aux $(latexfile).log $(latexfile).out\
-	     vc.tex $(latexfile).pdf $(latexfile).pyg $(latexfile).toc
+	rm -rf build
+	rm -rf vc.tex

@@ -10,12 +10,12 @@ LIB_PATH=control
 # Define if not defined
 BIN_PATH?=../bin
 
-CXXFLAGS += -std=c++0x -pipe -O0 -g -Wall -W -pedantic-errors
+CXXFLAGS += -std=c++0x -pipe -O3 -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 
 CPPFLAGS+= -I$(INCLUDE_PATH)
 
-LDFLAGS+= -L$(LIB_PATH) -lcontrol -lprotobuf -lboost_system
+LDFLAGS+= -L$(LIB_PATH) -lcontrol -lprotobuf-lite -lboost_system
 LDFLAGS+= -lboost_thread-mt -lrt
 
 OBJS= batchtank.pb.o main.o
@@ -33,22 +33,12 @@ install:
 uninstall:
 	rm -f $(BIN_PATH)/$(BIN_NAME)
 
-clean: protoclean
+clean:
 	for DIR in $(SUB_DIRS); do \
 		cd $(PWD)/$$DIR && make clean; \
 	done
 	rm -f *.o $(BIN_NAME)
 
-main.o: main.cc batchtank.pb.h ../common/message_utils.h
+main.o: main.cc ../common/batchtank.pb.h ../common/message_utils.h
 	$(CXX) -c $(CXXFLAGS) main.cc -o main.o $(CPPFLAGS)
 
-#batchtank.pb.o: batchtank.pb.cc
-#	$(CXX) -c $(CXXFLAGS) batchtank.pb.cc -o batchtank.pb.o
-
-batchtank.pb.h: batchtank.pb.cc
-
-batchtank.pb.cc: $(PROTO_DIR)/batchtank.proto
-	protoc -I=$(PROTO_DIR) $(PROTO_DIR)/batchtank.proto --cpp_out=.
-
-protoclean:
-	rm -rf batchtank.pb.h batchtank.pb.cc

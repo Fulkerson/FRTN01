@@ -26,7 +26,7 @@ main()
         messages::BaseMessage msg;
         messages::Register* reg = msg.mutable_register_();
         reg->set_periodtime(50);
-        reg->add_type(messages::HEATERSENSOR);
+        reg->add_type(messages::HEATER_RATE);
         
         /* Send message */
         output << msg;
@@ -50,11 +50,11 @@ main()
 
             /* Get sample */
             messages::Sample s = msg.sample(0);
-            if (s.type() != messages::HEATERSENSOR) {
+            if (s.type() != messages::HEATER_RATE) {
                 std::cerr << "Didn't receive proper message" << std::endl;
                 break;
             } else {
-                std::cout << "Received: " << msg.DebugString() << std::endl;
+                std::cout << "Received message" <<  std::endl;
             }
             
             double value = s.value();

@@ -361,9 +361,7 @@ ConnectionThread::run()
 
             /* Parse message */
             in >> msg;
-
-            D std::cout << "DEBUG: " << msg.DebugString() << std::endl;
-            
+ 
             /* Handle signals */
             {
                 auto start = msg.signal().begin();
@@ -471,7 +469,6 @@ main()
 
         int listenport = pt.get<int>("General.listenport");
 	std::string tty(pt.get<std::string>("General.serialport"));
-
 
         /* IO monitor for batchtank process */
         IORegistry ioreg(tty);

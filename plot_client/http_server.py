@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from random import SystemRandom
 from urlparse import urlparse, parse_qs

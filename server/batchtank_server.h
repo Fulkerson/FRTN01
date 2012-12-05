@@ -2,7 +2,7 @@
 #define SERVER_H
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-#include "batchtank.pb.h"
+#include "../common/batchtank.pb.h"
 
 namespace batchtank {
 

@@ -192,7 +192,17 @@ The PID client, written in C++, consists of a main method which uses boost libra
 The PID parameters include K, Ti, Td, Tr, ref, umin, umax, inverted, and period.
 
 \subsubsection{Use scenario}
-The client starts with parsing server and controller details from a \verb+.ini+ file. After a succesful connection it sends sensor and period to the server and starts to wait for sensor values. When one is received a control signal is calculated and sent. Then controller states are updated and the client starts to wait for the next sensor value. The client also updates the PID parameters as they are changed in the \verb+.ini+ file.
+The client starts with parsing server and controller details from a
+\verb+.ini+ file. After a succesful connection the client registers for
+samples by issuing a register event to the server. Sensor and period
+is defined in register event and after this the client starts to wait
+for sample events. When one is received a control signal is calculated
+and sent. Then controller states are updated and the client starts to
+wait for the next sensor value.
+
+It is possible to update the PID parameters on the fly by editing the 
+\verb+.ini+ file however no error check is done. I.e. the client crashes
+on malformed configuration file.
 
 
 \subsection{Plot client}

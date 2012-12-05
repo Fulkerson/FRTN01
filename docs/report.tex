@@ -114,14 +114,14 @@ values as well as control signals for plotting use cases.
 
 
 \subsection{Driver}
-The driver for the communication over a serial port is written in the C language.
+The driver for the communication with the batch tank over a serial port is written in the C language.
 It makes use of the Unix API for terminal I/O. The operative system's driver will
 map the serial device to a file descriptor, hence the reads and writes are done
 with standard C functions read(3), write(1), open(2) and close(2).  The serial
 connection has a speed of 115200 baud. 
 
 The driver has a set and get function and a couple of enumerators specifying the
-sensor to set or to get. The driver supports all available sensors or motors of
+sensor or motor to set or to get. The driver supports all available sensors or motors of
 the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
 
 The get function is blocking with a timeout of 1 second. Any kind of failure will
@@ -129,13 +129,8 @@ make the functions return a negative number. Data is sent and received in chunks
 of 8 bits. The get function sends a byte asking the batch tank to send some
 information about a specific sensor or motor, it then blocks on the read function
 until all bytes are read. The set function simply puts commands on the serial
-line. The bytes are processed in accordance to the source code that runs on the
+line. The bytes are processed in accordance to the protocol description found in the source code that runs on the
 batch tank \cite[line 150-223]{kokare.c}. 
-
-The driver will always parse the whole value into bytes and then send it to the
-batch tank. The batch tank only supports values between 0 and 255. The
-temperature and the water level sensors may gerenrate greater values than 255.
-This is all supported. The driver is not thread safe.
 
 The driver will always parse the whole value into bytes and then send it to the
 batch tank. The batch tank only supports values between 0 and 255. The
@@ -229,11 +224,22 @@ Raspberry Pi serving plots to two clients and having one manual control client
 and one PID client the system use was about 3 \% CPU usage by the server and 
 about 30 \% CPU usage by the HTTP server.
 
+\subsection{Delay Messurements of the System}
+Doing ten thousand get and set request via the driver to find the delay; a ping test was also done: 
+\begin{itemize}
+\item{Set: 0.133 ms}
+\item{Get: 0.390 ms}
+\item{Ping: 0.4 ms} 
+\end{itemize}
+
+Note that there was only a switch to travell through for the ping request. 
 \section{Conclusion}
 % A conclusion section.\ref{kokare.c}. 
 The CPU usage shown in section \ref{results} Results indicates that there is no need of having
 the system spread out over multiple devices even if the system is designed to be spread out over
 multiple devices.
+
+The delay of the system is too small to create a problem. Even with greater distances between the client and the serer, the delay would not pose a problem since the batch tank process is too slow.
 
 \newpage
 

@@ -42,3 +42,5 @@ clean:
 main.o: main.cc ../common/batchtank.pb.h ../common/message_utils.h
 	$(CXX) -c $(CXXFLAGS) main.cc -o main.o $(CPPFLAGS)
 
+batchtank.pb.o: ../common/batchtank.pb.cc
+	$(CXX) -c $(CXXFLAGS) ../common/batchtank.pb.cc -o batchtank.pb.o

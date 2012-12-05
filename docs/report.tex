@@ -202,7 +202,10 @@ wait for the next sensor value.
 
 It is possible to update the PID parameters on the fly by editing the 
 \verb+.ini+ file however no error check is done. I.e. the client crashes
-on malformed configuration file.
+on malformed configuration file. This is accomplished by updating the
+parameters any time the unix signal USR1 is issued to the client. A
+external python process is used to monitor the configuration file and
+client process. The monitoring is done using inotify.
 
 
 \subsection{Plot client}

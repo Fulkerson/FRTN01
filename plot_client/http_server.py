@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from random import SystemRandom
 from urlparse import urlparse, parse_qs
 from collections import defaultdict
 
@@ -10,6 +9,7 @@ import re
 import os
 import socket
 import batchtank
+import ConfigParser
 
 DIR = 'batchtank/static' 
 
@@ -106,10 +106,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 def main():
     try:
+        ini = ConfigParser.ConfigParser()
+        ini.read("config.ini")
+
+        hostname = ini.get("General", "hostname")
+        port = ini.getint("General", "port")
+
         global procsoc
         procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # TODO: Connect with server running.
-        procsoc.connect(("localhost", 54000))
+        procsoc.connect((hostname, port))
 
         server = HTTPServer(('', 8080), RequestHandler)
         print 'Server running...'

@@ -6,25 +6,26 @@
 static int level;
 static int in_pump;
 static int out_pump;
+static timespec timestate;
 
 static void update_state()
 {
-   static time_t t;
- 
-    if (!t) {
-        time(&t);
-    }
 
-    time_t cur_t;
-    time(&cur_t);
+    timespec cur_t;
+    clock_gettime(CLOCK_MONOTONIC, &cur_t);
+
+    int secdiff = cur_t.tv_sec - timestate.tv_sec;
+    int nanodiff = cur_t.tv_nsec - timestate.tv_nsec;
+
+    double delta = secdiff + nanodiff / 1000000000.0;
    
     double vin = 0.2 * in_pump;
     double vout = 0.2 * out_pump;
-    level = level + (vin - vout) * (cur_t - t);
+    level = level + (vin - vout) * delta;
     if (level < 0) {
         level = 0;
     }
-    t = cur_t;
+    timestate = cur_t;
 }
 
 enum read_target {
@@ -79,6 +80,7 @@ int set(enum set_target target, int value)
 int init(const char* tty)
 {
     std::cout << "Dummy communication setup on " << tty << std::endl;
+    clock_gettime(CLOCK_MONOTONIC, &timestate);
     return 0;
 }
 

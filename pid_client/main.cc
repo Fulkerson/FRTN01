@@ -6,7 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-#include "batchtank.pb.h"
+#include "../common/batchtank.pb.h"
 #include "../common/message_utils.h"
 #include <control/pid.h>
 

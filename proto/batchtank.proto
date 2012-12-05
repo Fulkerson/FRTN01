@@ -1,6 +1,7 @@
 package batchtank_messages;
 
-//option optimize_for = LITE_RUNTIME;
+// We don't need the full runtime.
+option optimize_for = LITE_RUNTIME;
 
 enum Sensor {
     TEMP = 0;

@@ -10,7 +10,7 @@ LIB_PATH=control
 # Define if not defined
 BIN_PATH?=../bin
 
-CXXFLAGS += -std=c++0x -pipe -O3 -Wall -W -pedantic-errors
+CXXFLAGS += -std=c++0x -pipe -O2 -Wall -W -pedantic-errors
 CXXFLAGS += -Wmissing-braces -Wparentheses
 
 CPPFLAGS+= -I$(INCLUDE_PATH)

@@ -137,6 +137,18 @@
 \end{frame}
 
 %--- Slide 5 ---%
+\begin{frame}{Plot client}
+	\begin{itemize}
+    		\item A client that is a HTTP server.
+        \item Receives measurement data and control data from the server.
+        \item Listens for HTTP connections on port 8080.
+        \item Serves a HTML, CSS and Javascript based plotting system.
+        \item The plotting system sends AJAX GETs to the HTTP server which answers with the latest data.
+        \item Plots multiple curves on multiple plots.
+    \end{itemize}
+\end{frame}
+
+%--- Slide 6 ---%
 \begin{frame}{PID clients}
 \begin{columns}[T]
     \begin{column}{.55\textwidth}
@@ -147,27 +159,15 @@
     \end{columns}
 \end{frame}
 
-%--- Slide 6 ---%
-\begin{frame}{Plot client}
-\begin{columns}[T]
-    \begin{column}{.55\textwidth}
-        \begin{itemize}
-            \item A client that is a HTTP server.
-            \item Receives measurement data and control data from the server.
-            \item Listens for HTTP connections on port 8080.
-            \item Serves a HTML, CSS and Javascript based plotting system.
-            \item The plotting system sends AJAX GETs to the HTTP server which answers with the latest data.
-            \item Plots multiple curves on multiple plots.
-        \end{itemize}
-    \end{column}
-    \begin{column}{.45\textwidth}
-        \begin{figure}[H]
-           \centering
-           	Plot pic.
-  %         \includegraphics[width=0.7\textwidth]{batchprocess.jpg}
-        \end{figure}
-    \end{column}
-    \end{columns}
+%--- Slide 7 ---%
+\begin{frame}{PID client}
+	\begin{figure}
+		\center
+		\includegraphics[width=0.8\textwidth]{plot1.png}
+	\end{figure}
+	\begin{itemize}
+		\item PID client controlling the out pump based on water level with the reference value 400. Manually increasing in pump to create a response.
+		\item High frequency noise due to the water stream from the in pump. Will not affect out pump power that much due to inability to change pumping power fast.
+    \end{itemize}
 \end{frame}
-
 \end{document}

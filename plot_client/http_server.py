@@ -111,13 +111,14 @@ def main():
 
         hostname = ini.get("General", "hostname")
         port = ini.getint("General", "port")
+        listenport = ini.getint("General", "listenport")
 
         global procsoc
         procsoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # TODO: Connect with server running.
         procsoc.connect((hostname, port))
 
-        server = HTTPServer(('', 8080), RequestHandler)
+        server = HTTPServer(('', listenport), RequestHandler)
         print 'Server running...'
         server.serve_forever()
     except KeyboardInterrupt:

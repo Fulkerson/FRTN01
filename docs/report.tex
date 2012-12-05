@@ -15,7 +15,7 @@
 %\newtheorem{claim}{Claim}[section]
 \title{Control of Batch Tank using Raspberry Pi \\ FRTN01 project - Group 20}
 %\date{\GITDate,\\\small\GITAbrHash}
-\date{}
+%\date{}
 \author{Johan Anderholm \\ Jonathan Kämpe \\ Mikael Sahlström \\ Mikael Nilsson}
 
 \begin{document}
@@ -45,7 +45,7 @@ This project is designed as a two-tier client/server system
 \cite[p.~6]{clientserver} where none of the control processes need to be directly
 connected to the batch tank.
 
-The server contains of a driver that communicates with the batch tank over a
+The server consists of a driver that communicates with the batch tank over a
 serial interface and the server part of the server that receives connections from
 clients and serves them with desired data and redirects control signals from
 clients to the driver which sends them to the batch tank. The communication
@@ -88,7 +88,9 @@ The following events are defined:
 \begin{itemize}
 \item{jQuery}
 \item{Flot}
+\item{Boost}
 \end{itemize}
+
 
 \subsubsection{Protocol Buffers}
 The messages used to communicate between clients and the servers are
@@ -108,6 +110,23 @@ native serialization requires using a specific language and is seldom as
 efficient in terms of message size and serializing speed. A custom
 binary protocol may require very large reworking of actual code in the
 case of late stage changes.
+
+
+\subsubsection{boost::thread~\cite{boost::thread}}
+Originally the idea was to use the new C++11 threads. However there's
+not yet very good support for that among compilers. Boost provides a
+threading library very similar to that of std::thread and was used
+instead. On posix platforms this equates to using POSIX threads in the
+end.
+
+
+\subsubsection{boost::asio~\cite{boost::asio}}
+In order to simplify server and client communication in C++ a networking
+library called Asio is used. While asios main goal is to provide a
+consistend asynchronous network model it does contain good support for
+synchronous networking as well. It is much easier to work with than
+regular Unix socket, although at some level raw Unix sockets are beeing
+used anyway.
 
 
 \subsection{Server}
@@ -136,6 +155,7 @@ considerably easier. The server consists of the following classes:
 \item[Sampler]
   Ran as periodic task to sample at specified intervals.
 \end{description}
+
 
 \subsubsection{Use scenario}
 The server listens to a port specified in a \verb+.ini+ file. When a client
@@ -181,6 +201,7 @@ batch tank. The batch tank only supports values between 0 and 255. The
 temperature and the water level sensors may gerenrate greater values than 255.
 This is all supported. The driver is not thread safe.
 
+
 \subsection{PID client}
 The PID client, written in C++, consists of a main method which uses boost libraries for communication with the server and a PID class. The PID class have these public members:
 \begin{itemize}
@@ -190,6 +211,7 @@ The PID client, written in C++, consists of a main method which uses boost libra
 \end{itemize}
 
 The PID parameters include K, Ti, Td, Tr, ref, umin, umax, inverted, and period.
+
 
 \subsubsection{Use scenario}
 The client starts with parsing server and controller details from a
@@ -201,11 +223,13 @@ and sent. Then controller states are updated and the client starts to
 wait for the next sensor value.
 
 It is possible to update the PID parameters on the fly by editing the 
-\verb+.ini+ file however no error check is done. I.e. the client crashes
-on malformed configuration file. This is accomplished by updating the
+\verb+.ini+ file. This is accomplished by updating the
 parameters any time the unix signal USR1 is issued to the client. A
 external python process is used to monitor the configuration file and
 client process. The monitoring is done using inotify.
+
+Note that no error checking is done. I.e. the client crashes when asked
+to update using a malformed configuration file. 
 
 
 \subsection{Plot client}
@@ -230,6 +254,15 @@ right is shifted out from the left so that the curve always contains 100
 data points. This will create an effect where the data flows from the right to
 the left smoothly.
 
+
+\subsection{Manual client}
+There exist a Python client capable of manipulating the different parts
+of the batch process. It is realized as a class containing properties
+such as \verb+mixer+, \verb+heter+, \verb+level+. By importing this into
+a interactive shell such as \emph{IPython} manual control is effectively
+accomplished.
+
+
 \section{Control design}
 % A section describing the control design aspects of the p\ref{kokare.c}. roject.
 The controller is a standard PID controller implemented with forward approximation integral, forward approximation derivative, bumpless transfer, and tracking as anti-windup.
@@ -246,12 +279,39 @@ The control loop does the following in one iteration.
 \section{Running the system}
 % A section describing the user interface in the project including a short
 % HowTo description on how to start and operate the program.
-To start the system one should first connect a device to the batch tank and the
-serial connection to a USB port using a serial to USB adapter. After connecting
-the device to the batch tank start the server named batchtank\_server and it will
+The source code of the system is publically available in a GitHub
+repository~\cite{repo} and can be retrieved using GIT or as a zip archive.
+The different part of the system is divided into the following directoried:
+\begin{description}
+\item[server]
+  TCP server used for manipulating the actual process.
+\item[pid\_client]
+  TCP client PID regulator.
+\item[manual\_client]
+  Python client/library used for connecting to the server and manipulating the
+  batch process directly.
+\item[plot\_client]
+  Python based http\_server and client used for serving plotting data.
+\item[cook]
+  C library for serial communication to the actual batch process.
+\item[proto]
+  Protocol buffer definition.
+\item[common]
+  C++ utility functions shared between client and server.
+\end{description}
+
+Each part is described more in depth in its corresponding directory.
+
+To start the system one should first connect a device to the batch tank.
+During development a serial to USB adapter was used but as long as the
+correct port is specified in \emph{batchtank\_server.ini} anything
+should work.
+
+After connecting the device to the batch tank start batchtank\_server and it will
 start listening for incoming TCP connections from clients. Run these on either
 the same device as the server or on separate devices connected, via TCP/IP, to
-the server.
+the server. Note that depending of the permissions of the serial port
+the server may require super user privileges.
 
 \section{Results}\label{results}
 % A section containing the results. In case the project is a control-oriented
@@ -281,6 +341,7 @@ Raspberry Pi serving plots to two clients and having one manual control client
 and one PID client the system use was about 3 \% CPU usage by the server and 
 about 30 \% CPU usage by the HTTP server.
 
+
 \subsection{Delay Messurements of the System}
 Doing ten thousand get and set request via the driver to find the delay; a ping test was also done: 
 \begin{itemize}
@@ -289,7 +350,9 @@ Doing ten thousand get and set request via the driver to find the delay; a ping 
 \item{Ping: 0.4 ms} 
 \end{itemize}
 
-Note that there was only a switch to travell through for the ping request. 
+Note that there was only a switch to travel through for the ping request.
+
+
 \section{Conclusion}
 % A conclusion section.\ref{kokare.c}. 
 The CPU usage shown in section \ref{results} Results indicates that there is no need of having
@@ -301,21 +364,34 @@ The delay of the system is too small to create a problem. Even with greater dist
 \newpage
 
 \begin{thebibliography}{9}
+\bibitem{repo}
+Project source code
+\url{https://github.com/Fulkerson/FRTN01}
 \bibitem{clientserver}
 Kusarige, V. (2006), \emph{Client/server technology}, Southern Connecticut State University.
 \bibitem{json}
+JSON\\
 \url{http://www.json.org}
 \bibitem{python}
+Python\\
 \url{http://python.org}
 \bibitem{project12}
+Real-Time Systems: Project Descriptions 2012\\
 \url{http://www.control.lth.se/media/Education/EngineeringProgram/FRTN01/2012/projects12.pdf}
 \bibitem{kokare.c}
 \url{cook/kokare.c}
 \bibitem{protobuf}
+Protocol Buffers\\
 \url{http://code.google.com/p/protobuf}
 \bibitem{rtcs}
 Årzén, KE. (2012) \emph{Real-Time Control Systems}, Department of
 Automatic Control, Lund University.
+\bibitem{boost::asio}
+boost::asio\\
+\url{http://www.boost.org/doc/libs/1_52_0/doc/html/boost_asio.html}
+\bibitem{boost::thread}
+boost::thread\\
+\url{http://www.boost.org/doc/libs/1_52_0/doc/html/thread.html}
 \end{thebibliography}
 
 \end{document}

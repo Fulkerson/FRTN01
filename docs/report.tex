@@ -46,8 +46,7 @@ connected to the batch tank.
 
 The server consists of a driver that communicates with the batch tank over a
 serial interface, and a part responsible for managing connections from
-clients and serves them with desired data and redirects control signals from
-clients to the driver which sends them to the batch tank. The communication
+clients and serves them with desired data. The control signals from client are redirected to the driver which sends them to the batch tank. The communication
 between the server and its clients is done via the TCP/IP protocol which means
 that the clients can be located anywhere. In our tests we have had clients
 running on the same device as the server and on separate devices connected

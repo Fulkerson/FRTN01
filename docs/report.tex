@@ -216,10 +216,10 @@ public members:
 \item{void updateStates();}
 \end{itemize}
 
-The PID parameters include K, Ti, Td, Tr, ref, umin, umax, inverted, and period.
-Also, the client also takes parameters on server ip/port, which sensor to read,
-and which item to control which makes the whole system easy to configure and 
-dynamic in adding/removing controllers.
+The PID parameters include K, Ti, Td, Tr, N, ref, umin, umax, inverted, and 
+period. Also, the client also takes parameters on server ip/port, which sensor
+to read, and which item to control which makes the whole system easy to
+configure and dynamic in adding/removing controllers.
 
 It is possible to update the PID parameters on the fly by editing the 
 \verb+.ini+ file.
@@ -274,7 +274,7 @@ accomplished.
 \section{Control design}
 % A section describing the control design aspects of the project.
 The controller is a standard PID controller implemented with forward
-approximation integral, forward approximation derivative, bumpless transfer,
+approximation integral, backward approximation derivative, bumpless transfer,
 and tracking as anti-windup. The parameters have been chosen by empirical
 studies. 
 

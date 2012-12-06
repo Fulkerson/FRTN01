@@ -16,7 +16,7 @@ int main(){
 	double ref = 500;
 	int period = 100;
 
-	PIDParameters pp(1,2,1,0,period,ref,0,255,false);
+	PIDParameters pp(1,2,1,0,0.1,period,ref,0,255,false);
 	PID pid;
 	pid.updateParameters(pp);
 	std::cout << pp << "\n";

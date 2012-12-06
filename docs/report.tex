@@ -56,7 +56,7 @@ through a switch and TP-cable.
 
 From a high level perspective the system is very similar to message
 passing \cite[p.~71]{rtcs}. The server listens for messages, each
-containing any number of the predifined events, and processes these as
+containing any number of the predefined events, and processes these as
 soon as possible.
 
 \subsection{Events}
@@ -69,16 +69,16 @@ The following events are defined:
   sample.
 \item[signal]
   The server listens for (control) signal events and uses these to
-  control the batchtank process. A controlsignal message contains
+  control the batchtank process. A control signal message contains
   information on output to be used and the value as well as the
   reference value used to produce said signal.
 \item[register]
   Upon receiving a register event, the server periodically samples the
   process and sends these samples to the client. Inside a register
-  message period time and any numer of sensors are defined.
+  message period time and any number of sensors are defined.
 \item[getSensor]
   Used to tell the server to respond with samples for any number of
-  sensors right now, without any regard for periodtime and such.
+  sensors right now, without any regard for the period time and such.
 \item[getOutput]
   Similar to getSensor but responds with the latest used control signal
   (value and reference value) for specified output.
@@ -123,9 +123,9 @@ end.
 \subsubsection{boost::asio~\cite{boost::asio}}
 In order to simplify server and client communication in C++ a networking
 library called Asio is used. While asios main goal is to provide a
-consistend asynchronous network model it does contain good support for
+consistent asynchronous network model it does contain good support for
 synchronous networking as well. It is much easier to work with than
-regular Unix socket, although at some level raw Unix sockets are beeing
+regular Unix socket, although at some level raw Unix sockets are being
 used anyway.
 
 
@@ -188,7 +188,7 @@ The driver has a set and get function and a couple of enumerators specifying the
 sensor or motor to set or to get. The driver supports all available sensors or motors of
 the batch tank; temperature, water level, in/out pump, mixer, cooler and heater.
 
-The get function is blocking with a timeout of 1 second. Any kind of failure will
+The get function is blocking with a time out of 1 second. Any kind of failure will
 make the functions return a negative number. Data is sent and received in chunks
 of 8 bits. The get function sends a byte asking the batch tank to send some
 information about a specific sensor or motor, it then blocks on the read function
@@ -198,7 +198,7 @@ batch tank \cite[line 150-223]{kokare.c}.
 
 The driver will always parse the whole value into bytes and then send it to the
 batch tank. The batch tank only supports values between 0 and 255. The
-temperature and the water level sensors may gerenrate greater values than 255.
+temperature and the water level sensors may generate greater values than 255.
 This is all supported. The driver is not thread safe.
 
 
@@ -228,7 +228,7 @@ to update using a malformed configuration file.
 
 \subsubsection{Use scenario}
 The client starts with parsing server and controller details from a
-\verb+.ini+ file. After a succesful connection the client registers for
+\verb+.ini+ file. After a successful connection the client registers for
 samples by issuing a register event to the server. Sensor and period
 is defined in register event and after this the client starts to wait
 for sample events. When one is received a control signal is calculated
@@ -288,7 +288,7 @@ The control loop does the following in one iteration.
 % HowTo description on how to start and operate the program.
 The source code of the system is publically available in a GitHub
 repository~\cite{repo} and can be retrieved using GIT or as a zip archive.
-The different part of the system is divided into the following directoried:
+The different part of the system is divided into the following directories:
 \begin{description}
 \item[server]
   TCP server used for manipulating the actual process.
@@ -369,7 +369,7 @@ The CPU usage shown in section \ref{results} Results indicates that there is no 
 the system spread out over multiple devices even if the system is designed to be spread out over
 multiple devices.
 
-The delay of the system is too small to create a problem. Even with greater distances between the client and the serer, the delay would not pose a problem since the batch tank process is too slow.
+The delay of the system is too small to create a problem. Even with greater distances between the client and the server, the delay would not pose a problem since the batch tank process is too slow.
 
 The derivative part of the controller could not be used because it only
 amplifies the high frequency noise observed.

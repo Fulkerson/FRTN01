@@ -55,8 +55,22 @@ also makes calling timing functions more appropriate for real time tanks
 considerably easier.
 
 
-
 BUILD Debian/Ubuntu/Raspbian
 ============================
 The following packages are required to build::
     protobuf-compiler libprotobuf-dev libboost-system-dev libboost-thread-dev
+
+Run ``make`` in this directory to build the server. Edit the serial port
+entry in batchtank_server.ini if required to find the batch process.
+
+.. important::
+    On certain linux distributions of for the Raspberry Pi, namely
+    Raspbian, the flag -mfloat-abi=hard is required because
+    software float calling conventions is the default of GCC for the ARM
+    architecture of the Raspberry Pi. Raspbian on the other hand uses
+    hardware float calling conventions. See Makefile on how to do this.
+
+.. note::
+    A testing version not requiring a actual process is available by
+    running ``make dummy_batchtank_server``. This simulates some aspects
+    of the real batch process.

@@ -26,12 +26,17 @@ std::ostream& operator <<(std::ostream& os, const PIDParameters& p)
 
 PID::PID() : I(0), e(0), u(0), v(0), yo(0) {}
 
+/*
+ * Update parameters.
+ */
 void PID::updateParameters(const PIDParameters& params)
 {
 	p = params;
 }
 
-
+/*
+ * Limits the double x between min and max.
+ */
 double PID::limit(double x, double min, double max)
 {
 	if (x < min)
@@ -41,17 +46,25 @@ double PID::limit(double x, double min, double max)
 	return x;
 }
 
+/*
+ * Calculate the next control signal u based
+ * on the new level y.
+ */
 double PID::next(double y)
 {
 	e = p.r - y;
-	if (p.inverted)
+	if (p.inverted) {
 		e = -e;
+	}
 	v = p.Kp*e + I + p.Kd*(y-yo);
 	u = limit(v, p.umin, p.umax);
 	yo = y;
 	return u;
 }
 
+/*
+ * Update integral part.
+ */
 void PID::updateStates()
 {
 	I = I + p.Ki*e; + p.track*(u-v);

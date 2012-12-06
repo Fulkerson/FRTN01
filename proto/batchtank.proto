@@ -3,6 +3,8 @@ package batchtank_messages;
 // We don't need the full runtime.
 option optimize_for = LITE_RUNTIME;
 
+// The following enum is used to specify the different parts of the
+// batch process.
 enum Sensor {
     TEMP = 0;
     LEVEL = 1;
@@ -13,6 +15,7 @@ enum Sensor {
     COOLER_RATE = 6;
 }
 
+// Similar to Sensor, this is used to specify outputs.
 enum Output {
     HEATER = 0;
     COOLER = 1;
@@ -21,6 +24,10 @@ enum Output {
     MIXER = 4;
 }
 
+// The following message is used as a container for any other messages.
+// It does not need to contain anything and as such a main loop of a
+// program may check for members, effectively turning them into events
+// that may happen at any time and in any order.
 message BaseMessage {
     repeated Sample sample = 1;
     repeated ControlSignal signal = 2;

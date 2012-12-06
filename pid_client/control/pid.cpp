@@ -7,7 +7,7 @@
 PIDParameters::PIDParameters(double K, double Ti, double Td, double Tr,
 				double period, double ref, double min, double max, bool inverted) :
 		h(period/1000), Kp(K), Ki(Ti==0 ? 0 : K*period/1000/Ti),
-		Kd(-K*Td/period*1000), track(Tr==0 ? 0 : period/1000/Tr),
+		Kd(K*Td/period*1000), track(Tr==0 ? 0 : period/1000/Tr),
 		r(ref), umin(min), umax(max), inverted(inverted) {}
 
 PIDParameters::PIDParameters() :
@@ -24,7 +24,7 @@ std::ostream& operator <<(std::ostream& os, const PIDParameters& p)
 	return os;
 }
 
-PID::PID() : I(0), e(0), u(0), v(0), yo(0) {}
+PID::PID() : I(0), e(0), u(0), v(0) {}
 
 /*
  * Update parameters.
@@ -52,13 +52,13 @@ double PID::limit(double x, double min, double max)
  */
 double PID::next(double y)
 {
+	double eo = e;
 	e = p.r - y;
 	if (p.inverted) {
 		e = -e;
 	}
-	v = p.Kp*e + I + p.Kd*(y-yo);
+	v = p.Kp*e + I + p.Kd*(e-eo);
 	u = limit(v, p.umin, p.umax);
-	yo = y;
 	return u;
 }
 

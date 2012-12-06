@@ -22,7 +22,7 @@ public:
 class PID
 {
 private:
-	double I, yo, u, v, e;
+	double I, u, v, e;
 	PIDParameters p;
 	double limit(double,double,double);
 public:

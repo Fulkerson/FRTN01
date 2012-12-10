@@ -26,7 +26,7 @@
 \subtitle{Control of Batch Tank using Raspberry Pi}
 \author{Johan Anderholm \\ Jonathan Kämpe \\ Mikael Sahlström \\ Mikael Nilsson}
 \institute[LTH]{LTH}
-\date{\today}
+%\date{\today}
 
 %--- the titlepage frame -------------------------%
 \begin{frame}[plain]
@@ -37,6 +37,7 @@
 \begin{frame}{Project description}
 \begin{columns}[T]
     \begin{column}{.55\textwidth}
+        Process consists of:
         \begin{itemize}
             \item In pump to control the temperature.
             \item Out pump to control the water level.
@@ -70,12 +71,26 @@
 
         \begin{figure}[H]
            \centering
-           \includegraphics[width=1.0\textwidth]{systemoverview.pdf}
+           \includegraphics[width=1\textwidth]{systemoverview.pdf}
         \end{figure}
 
     \end{column}
 \end{columns}
 \end{frame}
+
+%\begin{frame}{Events}
+%\begin{columns}
+%    \begin{column}{.55\textwidth}
+%        \begin{itemize}
+%            \item sample
+%            \item signal
+%            \item register
+%            \item getSensor
+%            \item getOutput
+%        \end{itemize}
+%    \end{column}
+%\end{columns}
+%\end{frame}
 
 %--- Slide 2 ---%
 \begin{frame}{Server}
@@ -92,8 +107,7 @@
 
         \begin{figure}[H]
            \centering
-           	Can haz pic plx?
-  %         \includegraphics[width=0.7\textwidth]{batchprocess.jpg}
+         \includegraphics[width=1\textwidth]{server_sketch.pdf}
         \end{figure}
 
     \end{column}

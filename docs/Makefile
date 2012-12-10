@@ -1,14 +1,13 @@
-latexfile = report
 #cpdir = ../../docs
 
-all: $(latexfile).pdf
+all: report.pdf
 
 #failtable.tex:
 #	../src/failbench.py > failtable.tex
 
-$(latexfile).pdf : $(latexfile).tex vc.tex build_dir
-	while (xelatex -output-directory=build -shell-escape $(latexfile).tex 2> /dev/null ; \
-	grep -q "Rerun to get cross" build/$(latexfile).log ) do true ; \
+%.pdf : %.tex vc.tex build_dir
+	while (xelatex -output-directory=build -shell-escape $*.tex 2> /dev/null ; \
+	grep -q "Rerun to get cross" build/$*.log ) do true ; \
 	done
 #	mkdir -p $(cpdir)
 #	cp $(latexfile).pdf $(cpdir)

@@ -3,9 +3,9 @@
 \usetheme{Madrid}
 
 %--- Swedish support ---%
-\usepackage[T1]{fontenc}      
+\usepackage{fontspec}
 \usepackage[swedish]{babel}
-\usepackage[latin1]{inputenc}
+\setmainfont{Palatino Linotype}
 
 %--- verbatim support ---%
 \usepackage{verbatim}
@@ -65,6 +65,7 @@
             \item Server/Client that communicates though TCP/IP.
             \item Server is connected to the batchprocess.
             \item Clients receives measurement data from the server and sends control data to the server.
+            \item Boost.Threads and Boost.Asio
         \end{itemize}
     \end{column}
     \begin{column}{.45\textwidth}
@@ -78,20 +79,6 @@
 \end{columns}
 \end{frame}
 
-%\begin{frame}{Events}
-%\begin{columns}
-%    \begin{column}{.55\textwidth}
-%        \begin{itemize}
-%            \item sample
-%            \item signal
-%            \item register
-%            \item getSensor
-%            \item getOutput
-%        \end{itemize}
-%    \end{column}
-%\end{columns}
-%\end{frame}
-
 %--- Slide 2 ---%
 \begin{frame}{Server}
 \begin{columns}[T]
@@ -100,7 +87,7 @@
             \item Communicates with the batchprocess over a serial interface though a driver.
             \item Listens for connections from clients.
             \item Takes measurement data from the batchprocess and sends to the clients upon their request.
-            	\item Receives control data from the clients and send it to the batchprocess.
+            \item Receives control data from the clients and send it to the batchprocess.
         \end{itemize}
     \end{column}
     \begin{column}{.45\textwidth}
@@ -113,6 +100,50 @@
     \end{column}
 \end{columns}
 \end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Protocol Buffers}
+\begin{columns}
+    \begin{column}{.5\textwidth}
+    \normalsize
+    Message definition.
+    \footnotesize
+    \begin{verbatim}
+message Register {
+  required uint64 period = 1;
+}
+
+message Sample {
+  required int32 value = 1;
+}
+
+message BaseMessage {
+  optional Sample sample = 1;
+  optional Register register = 2;
+}
+\end{verbatim}
+    \end{column}
+    \begin{column}{.4\textwidth}
+    \normalsize
+    Compiled code.
+    \footnotesize
+    \begin{verbatim}
+MessageInput in(*m_Socket);
+BaseMessage msg;
+
+// Read message
+in >> msg;
+
+if (msg.hasregister()) {
+   Register* r = msg.register()
+   uint64_t period = r.period();
+   // Do stuff.
+}
+\end{verbatim}
+    \end{column}
+\end{columns}
+\end{frame}
+
 
 %--- Slide 3 ---%
 \begin{frame}{Driver}
@@ -175,7 +206,7 @@
 		\includegraphics[width=0.8\textwidth]{plot1.png}
 	\end{figure}
 	\begin{itemize}
-		\item PID client controlling the out pump based on water level with the reference value 400. Manually increasing in pump to create a response.
+		\item PID client controlling the out pump based on water level reference value set to 400 while manually controlling in pump to create a response.
 		\item High frequency noise due to the water stream from the in pump. Will not affect out pump power that much due to inability to change pumping power fast.
     \end{itemize}
 \end{frame}

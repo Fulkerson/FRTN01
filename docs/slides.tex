@@ -42,8 +42,8 @@
             \item In pump to control the temperature.
             \item Out pump to control the water level.
             \item Heater to simulate the exothermic process.
-            \item Cooler.
-            \item Mixer.
+            \item Cooler (not used).
+            \item Mixer to distribute heatchanges evenly.
         \end{itemize}
     \end{column}
     \begin{column}{.45\textwidth}
@@ -180,10 +180,20 @@ if (msg.hasregister()) {
 \end{semiverbatim}
 \end{frame}
 
+
 %--- Slide 5 ---%
+\begin{frame}{Clients}
+	\begin{itemize}
+   		\item Plotting, PID, Manual control.
+        \item Connects to server.
+		\item Communicates with protobuf messages.
+    \end{itemize}
+\end{frame}
+
+%--- Slide 6 ---%
 \begin{frame}{Plot client}
 	\begin{itemize}
-    		\item A client that is a HTTP server.
+    	\item A client that is an HTTP server.
         \item Receives measurement data and control data from the server.
         \item Listens for HTTP connections on port 8080.
         \item Serves a HTML, CSS and Javascript based plotting system.
@@ -192,14 +202,51 @@ if (msg.hasregister()) {
     \end{itemize}
 \end{frame}
 
-%--- Slide 6 ---%
+%--- Slide 7 ---%
 \begin{frame}{PID clients}
 	\begin{itemize}
-		\item A PID client receives measurement data from the server and calculates control data which then is sent to the server.            
+		\item C++, boost:asio.
+		\item Parameters in .ini files updates on the go.
+		\item Registers for periodic sampling.
+		\item Responds on each sample with a new control signal.
+		\item FAI, BAD, bumpless transfer, tracking.
+		\item Parameters chosen by empirical studies.
 	\end{itemize}
 \end{frame}
 
-%--- Slide 7 ---%
+%--- Slide 8 ---%
+\begin{frame}{PID.ini}
+\begin{columns}[T]
+	\begin{column}{.5\textwidth}
+%		\begin{verbatim}
+[General]\\
+ipaddress = 130.235.83.235\\
+port = 54000\\
+sensor = TEMP\\
+output = IN PUMP\\
+period = 50\\
+delay = 0\\
+%		\end{verbatim}
+	\end{column}
+
+	\begin{column}{.5\textwidth}
+%		\begin{verbatim}
+[PID]\\
+K = 10\\
+Ti = 10\\
+Td = 0\\
+Tr = 1\\
+N = 0\\
+ref = 370\\
+umin = 0\\
+umax = 200\\
+inverted = true\\
+%		\end{verbatim}
+	\end{column}
+\end{columns}
+\end{frame}
+
+%--- Slide 9 ---%
 \begin{frame}{PID client}
 	\begin{figure}
 		\center

@@ -5,7 +5,7 @@
 %--- Swedish support ---%
 \usepackage{fontspec}
 \usepackage[swedish]{babel}
-\setmainfont{Palatino Linotype}
+%\setmainfont{Palatino Linotype}
 
 %--- verbatim support ---%
 \usepackage{verbatim}
@@ -151,7 +151,8 @@ if (msg.hasregister()) {
             \item Driver for communicating with the batchprocess over a serial interface.
             \item Uses the Unix API termios.
             \item Uses standard C functions for I/O; read(2), write(3), open(2), close(2).
-            \item Sends and receives data in chunks of 8 bits, the data is raw.   
+            \item Sends and receives data in chunks of 8 bits, the data is raw.
+            \item Time out after 1 sec of no response.
         \end{itemize}
 \end{frame}
 

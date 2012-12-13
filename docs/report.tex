@@ -25,16 +25,39 @@
 \newpage
 \section{Problem description}
 % An introduction that states the problem that has been solved.
-This project aims to control a process called batchprocess that consists of a
-batchtank, two pumps (one for pumping into the tank and one for pumping out of the tank), a heater, a cooler and a mixer. As stated in the project descriptions
-\cite[p.~6]{project12}, we should simultaneously control the level and
-temperature in the tank while simulating an exothermic chemical reaction.
+This project aims to control a process called batchprocess that consists
+of a water tank, two pumps (one for pumping into the tank and one for
+pumping out of the tank), a heater, a cooler and a mixer. As stated in
+the project descriptions \cite[p.~6]{project12}, we should
+simultaneously control the level and temperature of the tank while at
+the same time simulating an exothermic chemical reaction.
 
-This means that the heater will simulate the exothermic reaction and we'll use
-the in pump to control the temperature. The out pump will then be used
-to control the level which can be set dynamically in a settings file for the PID client that controls this pump.
+The heater will simulate an exothermic reaction and whenever the
+temperature rises to high the in pump is used the in pump to lower the
+water temperare. The out pump is used to keep the water level at a
+reference level that can be set dynamically in a settings file for the
+PID client that controls this pump.
 
-There are sensors on the batchprocess that measures the water level and temperature.
+The available sensors of the batchprocess is a water level meter and a
+temperature meter.
+
+The control system should be designed as a distributed system, i.e. it
+should be possible to have geographically separate controllers connected
+to the process via relatively low latency and stable networking. Parts
+of the system should run on a small credit-card-sized computer called
+Raspberry Pi.
+
+\subsection{Raspberry Pi}
+The idea is to be able to keep a server on a Raspberry Pi attached the
+batch process. Thus creating a "movable" system. Also interacting with
+the process is made platform and hardware independent. Designing
+controllers should be possible over any hardware and any physical link
+layer capable of TCP/IP.
+
+The Raspberry Pi is a single chip computer running an Broadcom BCM2835
+system on a chip including among other things an ARM11 CPU and a
+floating point unit fully compliant with the IEEE 754 standard.
+
 
 \section{Program structure}
 % A section describing the main program structure, both from a class

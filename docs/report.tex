@@ -297,10 +297,10 @@ The control loop does the following in one iteration.
 \item{Update states}
 \end{itemize}
 
-\begin{table}[h]
+\begin{table}[H]
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|}
 \hline
-PID      & Sensor & period (ms) & K & Ti & Td & Tr & N & ref & umin & umax & inv \\
+PID      & Sensor & Period (ms) & K & Ti & Td & Tr & N & ref & umin & umax & inv \\
 \hline
 In pump  & TEMP & 50 & 10 & 10 & 0 & 1 & 0 & 370 & 0 & 200 & true \\
 \hline
@@ -340,28 +340,42 @@ The different part of the system is divided into the following directories:
 
 Each part is described more in depth in its corresponding directory.
 
-To start the system one should first connect a device to the batch tank.
-During development a serial to USB adapter was used but as long as the
-correct port is specified in \emph{batchtank\_server.ini} anything
-should work.
+To run the system you'll need a device connected to the batch tank.
+During development a serial to USB adapter was used (due to the lack of a serial
+port on modern computers) but as long as the correct port is specified in
+\emph{batchtank\_server.ini} anything should work.
 
-After connecting the device to the batch tank start batchtank\_server and it will
-start listening for incoming TCP connections from clients. Run these on either
-the same device as the server or on separate devices connected, via TCP/IP, to
-the server. Note that depending of the permissions of the serial port
-the server may require super user privileges.
+Then start batchtank\_server and it will begin to listen for incoming TCP
+connections from clients. Run these on either the same device as the server or on
+separate devices connected, via TCP/IP, to the server. Note that depending on the
+serial port permissions, the server may require super-user privileges.
+
+When the server is up and running and some client, for example the plot\_client,
+is connected to it measurement data is fetched from the batch tank and sent to
+the client. If the client is a pid\_client or a manual\_client the client might 
+send control data to the server which then will be forwarded to the batch tank.
+
+It should also be possible to see plots of measurement data and control signals
+when connecting to the plot\_client with a web browser on port 8080. Which plots 
+and containing curves that are shown is defined in the plot\_clients code.
+
+Use the pid\_client settings file (.ini file) to define which sensor to read data 
+from, set PID parameters and define which part of the batch tank to control. Also 
+define the server IP to connect to (localhost if both the client and server runs
+on the same device).
 
 \section{Results}\label{results}
 % A section containing the results. In case the project is a control-oriented
 % project this should include plots of measurement signals, reference sig-
 % nal, and control signal. If the project is more of a real-time nature then
-% this section could contain measurement results of different type.
+% this section could contain measurement resultsof of different type.
 In all our tests we can see that the water level have a "high frequency" noise
 that comes from when the water stream from the in pump hits the water in the
 tank. This noise is reflected upon the control signals that are based on water
 level measurements and can be seen in figure~\ref{fig:out pump}. 
 
-The high frequency noise does not affect the pumping power so much as they can not make such small and frequent changes in power.
+The high frequency noise does not affect the pumping power so much as they can 
+not make such small and frequent changes in power.
 
 When the derivative part of the controller was used a more unstable system  was
 observed.

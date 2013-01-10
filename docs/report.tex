@@ -27,19 +27,21 @@
 % An introduction that states the problem that has been solved.
 This project aims to control a process called batchprocess that consists
 of a water tank, two pumps (one for pumping into the tank and one for
-pumping out of the tank), a heater, a cooler and a mixer. As stated in
-the project descriptions \cite[p.~6]{project12}, we should
+pumping out of the tank), a heater, a cooler and a mixer. The available
+sensors of the batchprocess is a water level meter and a temperature
+meter. As stated in the project descriptions \cite[p.~6]{project12}, we should
 simultaneously control the level and temperature of the tank while at
 the same time simulating an exothermic chemical reaction.
 
 The heater will simulate an exothermic reaction and whenever the
-temperature rises to high the in pump is used the in pump to lower the
+temperature rises too high the in pump is used to lower the
 water temperare. The out pump is used to keep the water level at a
 reference level that can be set dynamically in a settings file for the
-PID client that controls this pump.
-
-The available sensors of the batchprocess is a water level meter and a
-temperature meter.
+PID client that controls this pump. It would be trivial to add the 
+cooler as another item of control. We have chosen to not include it
+due to the fact that it is not very efficient since the water in the 
+tank will be circulating. Also the little effect it would have would 
+only make it less of a challenge to control the pumps.
 
 The control system should be designed as a distributed system, i.e. it
 should be possible to have geographically separate controllers connected
